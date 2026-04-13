@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+:root {
+    --precision-red: #c00014;
+    --pink-baby: #fecbcb;
+    --pink-text: #f9a8b1;
+}
+
+.text-gradient-pink-red {
+    background: linear-gradient(to right, var(--pink-text), var(--precision-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.bg-gradient-pink-red {
+    background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
+}
+
+.table-precision {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.table-precision thead th {
+    background-color: var(--pink-baby);
+    color: var(--precision-red);
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+.table-row-precision {
+    border: 2px solid var(--pink-baby);
+}
+
+.table-precision tbody td {
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.input-precision {
+    background-color: #fecbcb22 !important;
+    border: 1px solid var(--pink-baby) !important;
+    color: var(--precision-red) !important;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    padding: 8px 12px !important;
+}
+
+.modal-overlay {
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+}
+</style>
+
+<div class="max-w-6xl mx-auto mt-10">
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-black text-gradient-pink-red tracking-tighter uppercase">Simulador de Investimentos</h1>
+        <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')"
+                class="bg-gradient-pink-red text-white px-6 py-2 rounded-xl font-black text-xs uppercase shadow-lg">
+            Nova Simulação
+        </button>
+    </div>
+
+    <!-- TABELA -->
+    <table class="table-precision">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Investido</th>
+                <th>Taxa (a.a)</th>
+                <th>Prazo</th>
+                <th>Lucro Estimado</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {# Namespace para garantir que a soma funcione fora do loop for #}
+            {% set ns = namespace(total_lucro=0) %}
+
+            {% if investimentos %}
+                {% for inv in investimentos %}
+                <tr class="table-row-precision">
+                    <td style="color: var(--precision-red); font-weight: bold;">{{ inv.tipo }}</td>
+                    <td>R$ {{ "%.2f"|format(inv.valor_investido|float) }}</td>
+                    <td>{{ inv.taxa }}%</td>
+                    <td>{{ inv.tempo }} meses</td>
+                    <td style="color: green; font-weight: bold;">R$ {{ "%.2f"|format(inv.lucro|float) }}</td>
+                    <td>
+                        <a href="{{ url_for('excluir_simulador', id=inv.id) }}" class="hover:opacity-70">
+                            <span class="material-symbols-outlined" style="color: var(--precision-red)">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% set ns.total_lucro = ns.total_lucro + (inv.lucro|float) %}
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-10 text-gray-400 italic">Nenhuma simulação registrada.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" style="text-align: right; font-weight: 900; color: var(--precision-red); padding-right: 20px;">
+                    TOTAL LUCRO ACUMULADO:
+                </td>
+                <td style="font-weight: 900; color: var(--precision-red); font-size: 14px; border-bottom: 3px double var(--pink-baby);">
+                    R$ {{ "%.2f"|format(ns.total_lucro) }}
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- MODAL -->
+<div id="modalCadastro" class="hidden fixed inset-0 flex items-center justify-center modal-overlay z-50">
+    <div class="bg-white w-[380px] rounded-[2.5rem] border-[4px] border-[--pink-baby] relative shadow-2xl p-8">
+
+        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
+                class="absolute top-5 right-5 text-gray-400 hover:text-red-600 transition font-black text-xl">✕</button>
+
+        <div class="text-center border-b pb-4 mb-6" style="border-color: var(--pink-baby);">
+            <h3 class="font-black text-gradient-pink-red text-xl uppercase tracking-widest">Nova Simulação</h3>
+            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold">Terminal Precision Invest</p>
+        </div>
+
+        <form id="formSimulador" method="POST" class="space-y-4">
+            <!-- TIPO -->
+            <select name="tipo" id="tipo" class="w-full input-precision" onchange="atualizarTaxaAuto()" required>
+                <option value="" disabled selected>Tipo de Ativo</option>
+                <option value="CDI">CDI</option>
+                <option value="LCI">LCI</option>
+                <option value="LCA">LCA</option>
+                <option value="SELIC">TESOURO SELIC</option>
+                <option value="PREFIXADO">TESOURO PREFIXADO</option>
+                <option value="IPCA">TESOURO IPCA+</option>
+            </select>
+
+            <!-- VALOR -->
+            <input type="number" name="valor_investido" placeholder="Valor investido (R$)" class="w-full input-precision" required>
+
+            <!-- TAXA COM SÍMBOLO % -->
+            <div class="relative">
+                <input type="number" step="0.01" id="taxa" name="taxa" placeholder="Taxa anual" class="w-full input-precision pr-8" required>
+                <span class="absolute right-4 top-2.5 text-pink-400 font-black">%</span>
+            </div>
+
+            <!-- PRAZO (MESES OU ANOS) -->
+            <div class="flex gap-2">
+                <input type="number" id="tempo_val" name="tempo" placeholder="Prazo" class="w-2/3 input-precision" required>
+                <select id="unidade" class="w-1/3 input-precision text-[10px] font-bold">
+                    <option value="meses">MESES</option>
+                    <option value="anos">ANOS</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-2xl shadow-lg mt-2 uppercase text-[10px] tracking-[0.2em] hover:scale-[1.02] transition">
+                Calcular e Salvar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const taxasMercado = {
+    "CDI": 11.15,
+    "LCI": 9.85,
+    "LCA": 9.85,
+    "SELIC": 11.25,
+    "PREFIXADO": 12.50,
+    "IPCA": 6.25
+};
+
+function atualizarTaxaAuto() {
+    const tipo = document.getElementById('tipo').value;
+    const inputTaxa = document.getElementById('taxa');
+    if (taxasMercado[tipo]) {
+        inputTaxa.value = taxasMercado[tipo];
+    }
+}
+
+// Converte anos para meses antes de enviar o formulário
+document.getElementById('formSimulador').onsubmit = function() {
+    const tempoInput = document.getElementById('tempo_val');
+    const unidade = document.getElementById('unidade').value;
+
+    if (unidade === 'anos') {
+        tempoInput.value = parseInt(tempoInput.value) * 12;
+    }
+};
+
+// Fechar modal ao clicar fora dele
+window.onclick = function(event) {
+    const modal = document.getElementById('modalCadastro');
+    if (event.target === modal) modal.classList.add('hidden');
+}
+</script>
+{% endblock %}

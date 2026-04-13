@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+:root {
+    --precision-red: #c00014;
+    --pink-baby: #fecbcb;
+    --pink-text: #f9a8b1;
+}
+
+.text-gradient-pink-red {
+    background: linear-gradient(to right, var(--pink-text), var(--precision-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.bg-gradient-pink-red {
+    background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
+}
+
+.table-precision {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 15px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.table-precision thead th {
+    background-color: var(--pink-baby);
+    color: var(--precision-red);
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-align: center;
+    padding: 20px 10px;
+}
+
+.table-row-precision {
+    border: 2px solid var(--pink-baby);
+}
+
+.table-precision tbody td {
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 11px;
+}
+
+.input-precision {
+    background-color: #fecbcb22 !important;
+    border: 1px solid var(--pink-baby) !important;
+    color: var(--precision-red) !important;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    padding: 8px 12px !important;
+}
+
+.modal-overlay {
+    background-color: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+}
+</style>
+
+<div class="max-w-7xl mx-auto px-4 pb-20">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-10 mt-6">
+        <div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter">
+                <span class="text-gradient-pink-red">Gerenciamento de Ativos</span>
+            </h1>
+            <p class="text-[9px] font-black mt-1 tracking-[0.4em] text-gradient-pink-red uppercase">
+                PRECISION INVEST • TERMINAL
+            </p>
+        </div>
+
+        <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')"
+                class="bg-gradient-pink-red text-white font-black py-3 px-8 rounded-xl shadow-lg flex items-center gap-2 text-xs">
+            <span class="material-symbols-outlined text-sm">add_business</span>
+            NOVA EMPRESA
+        </button>
+    </div>
+
+    <!-- TABELA -->
+    <div class="overflow-x-auto">
+        <table class="table-precision">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th>Empresa</th>
+                    <th>Setor</th>
+                    <th>Qtd Ações</th>
+                    <th>Preço</th>
+                    <th>Lucro</th>
+                    <th>Patrimônio</th>
+                    <th>Ativos</th>
+                    <th>Dívida</th>
+                    <th>Lote</th>
+                    <th>Tipo</th>
+                    <th>V. Mercado</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if empresas %}
+                    {% for empresa in empresas %}
+                    <tr class="table-row-precision">
+
+                        <td style="color: var(--precision-red)">{{ empresa.ticker }}</td>
+                        <td style="color: var(--precision-red)">{{ empresa.empresa }}</td>
+                        <td style="color: var(--precision-red)">{{ empresa.setor }}</td>
+                        <td style="color: var(--precision-red)">{{ empresa.num_acoes or 0 }}</td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format(empresa.preco_acao or 0) }}
+                        </td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format(empresa.lucro_liquido or 0) }}
+                        </td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format(empresa.patrimonio or 0) }}
+                        </td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format(empresa.ativos or 0) }}
+                        </td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format(empresa.divida or 0) }}
+                        </td>
+
+                        <td style="color: var(--precision-red)">{{ empresa.lote or 0 }}</td>
+                        <td style="color: var(--precision-red)">{{ empresa.tipo_acao }}</td>
+
+                        <td style="color: var(--precision-red)">
+                            R$ {{ "%.2f"|format((empresa.num_acoes or 0) * (empresa.preco_acao or 0)) }}
+                        </td>
+
+                        <td class="flex justify-center gap-2">
+                            <a href="{{ url_for('editar_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
+                                <span class="material-symbols-outlined">delete</span>
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="13" class="text-center py-10 text-gray-400">
+                            Nenhum ativo no terminal.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- INDICADORES (ADICIONADO SEM MUDAR NADA) -->
+    <div class="overflow-x-auto mt-10">
+        <table class="table-precision">
+            <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>ROE</th>
+                    <th>ROA</th>
+                    <th>ROIC</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for empresa in empresas %}
+
+                {% set lucro = empresa.lucro_liquido or 0 %}
+                {% set patrimonio = empresa.patrimonio or 0 %}
+                {% set ativos = empresa.ativos or 0 %}
+                {% set divida = empresa.divida or 0 %}
+                {% set capital = ativos - divida %}
+
+                {% set roe = (lucro / patrimonio * 100) if patrimonio != 0 else 0 %}
+                {% set roa = (lucro / ativos * 100) if ativos != 0 else 0 %}
+                {% set roic = (lucro / capital * 100) if capital > 0 else 0 %}
+
+                <tr class="table-row-precision">
+                    <td style="color: var(--precision-red)">{{ empresa.empresa }}</td>
+                    <td style="color: green">{{ "%.2f"|format(roe) }}</td>
+                    <td style="color: green">{{ "%.2f"|format(roa) }}</td>
+                    <td style="color: green">{{ "%.2f"|format(roic) }}</td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- MODAL -->
+<!-- MODAL COMPLETO E INTEGRADO -->
+<div id="modalCadastro" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-overlay">
+    <div class="bg-white w-[450px] rounded-[2.5rem] border-[4px] border-[--pink-baby] relative overflow-y-auto max-h-[90vh] shadow-2xl p-6">
+
+        <!-- FECHAR -->
+        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
+                class="absolute top-4 right-4 font-black text-xl text-red-600 hover:text-red-800">✕</button>
+
+        <div class="text-center border-b pb-4 mb-4" style="border-color: var(--pink-baby);">
+            <h3 class="font-black uppercase text-gradient-pink-red text-xl">Novo Registro</h3>
+            <p class="text-[10px] text-gray-500 mt-1">PRECISION INVEST • TERMINAL DATA</p>
+        </div>
+
+        <form action="{{ url_for('cadastrar_empresa') }}" method="POST" class="space-y-3">
+
+            <!-- TICKER COM BUSCA -->
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-pink-500">label</span>
+                <input type="text" id="ticker" name="ticker" class="input-precision flex-1 uppercase" placeholder="Ticker (Ex: PETR4)" required>
+                <button type="button" onclick="autoPreencher()" class="bg-gradient-pink-red text-white p-2 rounded-lg hover:scale-105 transition">
+                    <span class="material-symbols-outlined text-sm">search</span>
+                </button>
+            </div>
+
+            <!-- EMPRESA E SETOR -->
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-pink-500">business</span>
+                <input type="text" id="empresa" name="empresa" class="input-precision w-full" placeholder="Nome da Empresa" required>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-pink-500">category</span>
+                <input type="text" id="setor" name="setor" class="input-precision w-full" placeholder="Setor" required>
+            </div>
+
+            <!-- QTD E PREÇO -->
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" name="num_acoes" class="input-precision" placeholder="Qtd Ações" required>
+                <input type="text" id="preco_acao" name="preco_acao" class="input-precision" placeholder="Preço Atual" required>
+            </div>
+
+            <!-- FINANCEIRO (LUCRO E PATRIMÔNIO) -->
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="lucro_liquido" name="lucro_liquido" class="input-precision" placeholder="Lucro Líquido">
+                <input type="text" id="patrimonio" name="patrimonio" class="input-precision" placeholder="Patrimônio">
+            </div>
+
+            <!-- ATIVOS E DÍVIDA -->
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="ativos" name="ativos" class="input-precision" placeholder="Ativos Totais">
+                <input type="text" id="divida" name="divida" class="input-precision" placeholder="Dívida Total">
+            </div>
+
+            <!-- LOTE E TIPO -->
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" name="lote" class="input-precision" placeholder="Lote (Ex: 100)" value="100">
+                <select name="tipo_acao" class="input-precision">
+                    <option value="ON">ON (Ordinária)</option>
+                    <option value="PN">PN (Preferencial)</option>
+                    <option value="UNIT">UNIT</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-xl shadow-lg mt-2 uppercase text-[10px] tracking-[0.2em]">
+                SALVAR NO TERMINAL
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- SCRIPTS DE COMPORTAMENTO -->
+<script>
+function autoPreencher() {
+    const tInput = document.getElementById('ticker');
+    let t = tInput.value.trim().toUpperCase();
+    if(!t) return alert("Digite um ticker!");
+
+    tInput.style.opacity = "0.5";
+
+    fetch(`/buscar_acao/${t}`)
+        .then(r => r.json())
+        .then(data => {
+            if(data.nome){
+                // Preenche os campos de texto
+                document.getElementById('empresa').value = data.nome;
+                document.getElementById('setor').value = data.setor || "";
+
+                // Preenche os valores numéricos (Preço com vírgula para o seu parse_float)
+                document.getElementById('preco_acao').value = data.preco ? data.preco.toFixed(2).replace('.', ',') : "0,00";
+
+                // Preenche os dados contábeis (Lucro, Patrimônio, Ativos, Dívida)
+                document.getElementById('lucro_liquido').value = data.lucro_liquido || 0;
+                document.getElementById('patrimonio').value = data.patrimonio || 0;
+                document.getElementById('ativos').value = data.ativos || 0;
+                document.getElementById('divida').value = data.divida || 0;
+            } else {
+                alert("Ativo não encontrado.");
+            }
+        })
+        .catch(err => alert("Erro ao buscar dados na B3."))
+        .finally(() => tInput.style.opacity = "1");
+}
+
+// Fechar modal ao clicar fora
+window.onclick = function(event) {
+    const modal = document.getElementById('modalCadastro');
+    if (event.target == modal) modal.classList.add('hidden');
+}
+</script>
+
+{% endblock %}

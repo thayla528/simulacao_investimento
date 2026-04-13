@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+:root {
+    --precision-red: #c00014;
+    --pink-baby: #fecbcb;
+    --pink-text: #f9a8b1;
+}
+
+.text-gradient-pink-red {
+    background: linear-gradient(to right, var(--pink-text), var(--precision-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.bg-gradient-pink-red {
+    background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
+}
+
+.card {
+    background-color: #fffafa;
+    border: 2px solid var(--pink-baby);
+    border-radius: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.card h3 {
+    font-weight: 900;
+    color: var(--precision-red);
+    margin-top: 0.5rem;
+}
+
+.card p {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.2rem;
+}
+
+.input-file-modern {
+    font-size: 10px;
+    width: 100%;
+    color: #888;
+    text-align: center;
+}
+.input-file-modern::-webkit-file-upload-button {
+    background: white;
+    border: 1px solid var(--pink-baby);
+    padding: 6px 12px;
+    border-radius: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--pink-text);
+    cursor: pointer;
+    margin-bottom: 8px;
+    width: 100%;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+}
+.input-file-modern::-webkit-file-upload-button:hover {
+    background-color: #fff1f1;
+}
+</style>
+
+<div class="max-w-7xl mx-auto px-4 pb-20">
+
+    <!-- CABEÇALHO -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 mt-6">
+        <div>
+            <h1 class="text-3xl font-black uppercase tracking-tighter">
+                <span class="text-gradient-pink-red">Perfil do Usuário</span>
+            </h1>
+            <p class="text-[9px] font-black mt-1 tracking-[0.4em] text-gradient-pink-red uppercase">
+                PRECISION INVEST • TERMINAL
+            </p>
+        </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+
+        <!-- FOTO -->
+        <div class="card flex flex-col items-center justify-center">
+            {% if os.path.exists('static/perfil/' + usuario + '.png') %}
+                <img src="{{ url_for('static', filename='perfil/' + usuario + '.png') }}"
+                     class="rounded-full mb-2 w-20 h-20 object-cover border-2 border-pink-baby">
+            {% else %}
+                <div class="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center border-2 border-pink-baby mb-2">
+                    <span class="material-symbols-outlined text-4xl" style="color: var(--precision-red)">person</span>
+                </div>
+            {% endif %}
+
+            <h3>{{ usuario }}</h3>
+
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_foto') }}" class="mt-4 w-full">
+                <input type="file" name="foto" required class="input-file-modern">
+                <button type="submit" class="bg-gradient-pink-red text-white font-black py-2 px-3 rounded-xl text-[10px] uppercase w-full">
+                    Alterar Foto
+                </button>
+            </form>
+        </div>
+
+        <!-- EMPRESAS -->
+        <div class="card">
+            <h3>{{ empresas|length }}</h3>
+            <p>Empresas cadastradas</p>
+        </div>
+
+       <!-- Lucro total -->
+        <div class="card">
+            {% set ns = namespace(total=0) %}
+            {% for empresa in empresas %}
+                {% set ns.total = ns.total + (empresa.lucro_liquido|float(default=0)) %}
+            {% endfor %}
+            <h3>R$ {{ "%.2f"|format(ns.total) }}</h3>
+            <p>Lucro total</p>
+        </div>
+
+        <!-- PLACEHOLDER -->
+        <div class="card">
+            <h3>-</h3>
+            <p>Em breve</p>
+        </div>
+    </div>
+
+    <!-- TABELA -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-separate border-spacing-y-3">
+            <tbody>
+                {% for empresa in empresas %}
+                <tr class="bg-white shadow-sm rounded-2xl">
+                    <td class="px-4 py-4 rounded-l-2xl font-black" style="color: var(--precision-red)">
+                        {{ empresa.ticker }}
+                    </td>
+                    <td class="px-4 py-4 font-bold uppercase" style="color: var(--precision-red)">
+                        {{ empresa.empresa }}
+                    </td>
+                    <td class="px-4 py-4" style="color: var(--precision-red)">
+                        R$ {{ "%.2f"|format(empresa.preco_acao or 0) }}
+                    </td>
+                    <td class="px-4 py-4 font-black" style="color: var(--precision-red)">
+                        R$ {{ "%.2f"|format(empresa.lucro_liquido or 0) }}
+                    </td>
+                    <td class="px-4 py-4 rounded-r-2xl flex justify-end gap-2">
+                        <a href="{{ url_for('editar_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
+                            <span class="material-symbols-outlined">edit</span>
+                        </a>
+                        <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
+                            <span class="material-symbols-outlined">delete</span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
