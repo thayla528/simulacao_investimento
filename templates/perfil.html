@@ -1,11 +1,22 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
+<!-- Chart.js correto -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root {
     --precision-red: #c00014;
+    --precision-green: #00c853;
     --pink-baby: #fecbcb;
     --pink-text: #f9a8b1;
+}
+
+body {
+    background-color: #000000 !important;
+    background-image: radial-gradient(#111 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+    color: #e5e2e1;
 }
 
 .text-gradient-pink-red {
@@ -15,148 +26,231 @@
     display: inline-block;
 }
 
-.bg-gradient-pink-red {
-    background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
-}
-
-.card {
-    background-color: #fffafa;
-    border: 2px solid var(--pink-baby);
+.glass-card {
+    background-color: #0a0a0a;
+    border: 1px solid rgba(254, 203, 203, 0.1);
     border-radius: 1.5rem;
-    padding: 1rem;
-    text-align: center;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
 }
 
-.card h3 {
-    font-weight: 900;
+.glass-card:hover {
+    border-color: var(--precision-red);
+}
+
+.text-neon-red {
     color: var(--precision-red);
-    margin-top: 0.5rem;
+    text-shadow: 0 0 10px rgba(192, 0, 20, 0.3);
 }
 
-.card p {
-    font-size: 0.8rem;
-    color: #555;
-    margin-top: 0.2rem;
+.bg-precision { background-color: var(--precision-red); }
+
+/* Animação para indicador online */
+.pulse-green {
+    width: 8px;
+    height: 8px;
+    background-color: var(--precision-green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
 }
 
-.input-file-modern {
-    font-size: 10px;
-    width: 100%;
-    color: #888;
-    text-align: center;
-}
-.input-file-modern::-webkit-file-upload-button {
-    background: white;
-    border: 1px solid var(--pink-baby);
-    padding: 6px 12px;
-    border-radius: 0.75rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    color: var(--pink-text);
-    cursor: pointer;
-    margin-bottom: 8px;
-    width: 100%;
-    letter-spacing: 0.1em;
-    transition: all 0.3s;
-}
-.input-file-modern::-webkit-file-upload-button:hover {
-    background-color: #fff1f1;
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
 }
 </style>
 
-<div class="max-w-7xl mx-auto px-4 pb-20">
+<div class="max-w-7xl mx-auto px-4 pb-20 pt-10">
 
     <!-- CABEÇALHO -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 mt-6">
         <div>
             <h1 class="text-3xl font-black uppercase tracking-tighter">
-                <span class="text-gradient-pink-red">Perfil do Usuário</span>
+                <span class="text-gradient-pink-red">Central de Operações</span>
             </h1>
-            <p class="text-[9px] font-black mt-1 tracking-[0.4em] text-gradient-pink-red uppercase">
-                PRECISION INVEST • TERMINAL
+            <p class="text-[9px] font-black mt-1 tracking-[0.4em] text-white/40 uppercase">
+                PRECISION INVEST • LIVE B3 TERMINAL
             </p>
+        </div>
+
+        <!-- PERFIL -->
+        <div class="flex items-center gap-6 p-4 glass-card rounded-xl">
+            <div class="relative group">
+                {% if os.path.exists('static/perfil/' + usuario + '.png') %}
+                    <img src="{{ url_for('static', filename='perfil/' + usuario + '.png') }}"
+                         class="w-20 h-20 rounded-lg object-cover border-2" style="border-color: var(--pink-text)">
+                {% else %}
+                    <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/10">
+                        <span class="material-symbols-outlined text-3xl text-white/20">person</span>
+                    </div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_foto') }}" class="absolute -bottom-2 -right-2">
+                    <label for="foto-input" class="cursor-pointer bg-precision text-white p-1 rounded-md flex hover:scale-110 transition">
+                        <span class="material-symbols-outlined text-sm">photo_camera</span>
+                        <input type="file" id="foto-input" name="foto" class="hidden" onchange="this.form.submit()">
+                    </label>
+                </form>
+            </div>
+            <div>
+                <div class="text-[10px] font-bold tracking-widest uppercase mb-1" style="color: var(--pink-text)">Operador Ativo</div>
+                <div class="text-xl font-headline font-bold uppercase tracking-tight">{{ usuario }}</div>
+            </div>
         </div>
     </div>
 
-    <!-- CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <!-- DASHBOARD -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
 
-        <!-- FOTO -->
-        <div class="card flex flex-col items-center justify-center">
-            {% if os.path.exists('static/perfil/' + usuario + '.png') %}
-                <img src="{{ url_for('static', filename='perfil/' + usuario + '.png') }}"
-                     class="rounded-full mb-2 w-20 h-20 object-cover border-2 border-pink-baby">
-            {% else %}
-                <div class="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center border-2 border-pink-baby mb-2">
-                    <span class="material-symbols-outlined text-4xl" style="color: var(--precision-red)">person</span>
+        <div class="lg:col-span-2 glass-card h-[350px] flex flex-col p-6">
+            <div class="flex justify-between items-center mb-6">
+                <!-- Corrigido o tamanho da fonte para não quebrar -->
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/40">Performance Consolidada de Lucro</span>
+                <div class="flex items-center gap-4">
+                    <div class="pulse-green"></div>
+                    <span class="text-[9px] font-bold text-green-600 uppercase">Live Data</span>
                 </div>
-            {% endif %}
-
-            <h3>{{ usuario }}</h3>
-
-            <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_foto') }}" class="mt-4 w-full">
-                <input type="file" name="foto" required class="input-file-modern">
-                <button type="submit" class="bg-gradient-pink-red text-white font-black py-2 px-3 rounded-xl text-[10px] uppercase w-full">
-                    Alterar Foto
-                </button>
-            </form>
+            </div>
+            <div class="flex-1 w-full relative">
+                <canvas id="lucroChart"></canvas>
+            </div>
         </div>
 
-        <!-- EMPRESAS -->
-        <div class="card">
-            <h3>{{ empresas|length }}</h3>
-            <p>Empresas cadastradas</p>
-        </div>
+        <!-- INDICADORES -->
+        <div class="flex flex-col gap-4">
+            <div class="glass-card flex-1 flex flex-col justify-center border-l-4 border-precision">
+                <h3 class="text-4xl font-black text-white">{{ empresas|length }}</h3>
+                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Empresas Monitoradas</p>
+            </div>
 
-       <!-- Lucro total -->
-        <div class="card">
-            {% set ns = namespace(total=0) %}
-            {% for empresa in empresas %}
-                {% set ns.total = ns.total + (empresa.lucro_liquido|float(default=0)) %}
-            {% endfor %}
-            <h3>R$ {{ "%.2f"|format(ns.total) }}</h3>
-            <p>Lucro total</p>
-        </div>
-
-        <!-- PLACEHOLDER -->
-        <div class="card">
-            <h3>-</h3>
-            <p>Em breve</p>
+            <div class="glass-card flex-1 flex flex-col justify-center border-l-4" style="border-left-color: var(--pink-text)">
+                {% set ns = namespace(total_p_l=0) %}
+                {% for empresa in empresas %}
+                    {% set ns.total_p_l = ns.total_p_l + (empresa.variacao_valor|float(default=0)) %}
+                {% endfor %}
+                <h3 class="text-4xl font-black {% if ns.total_p_l >= 0 %}text-green-500{% else %}text-red-600{% endif %}">
+                    R$ {{ "%.2f"|format(ns.total_p_l) }}
+                </h3>
+                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Lucro em Tempo Real</p>
+                <div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
+                    <div class="bg-precision h-full w-2/3"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- TABELA -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-separate border-spacing-y-3">
-            <tbody>
-                {% for empresa in empresas %}
-                <tr class="bg-white shadow-sm rounded-2xl">
-                    <td class="px-4 py-4 rounded-l-2xl font-black" style="color: var(--precision-red)">
-                        {{ empresa.ticker }}
-                    </td>
-                    <td class="px-4 py-4 font-bold uppercase" style="color: var(--precision-red)">
-                        {{ empresa.empresa }}
-                    </td>
-                    <td class="px-4 py-4" style="color: var(--precision-red)">
-                        R$ {{ "%.2f"|format(empresa.preco_acao or 0) }}
-                    </td>
-                    <td class="px-4 py-4 font-black" style="color: var(--precision-red)">
-                        R$ {{ "%.2f"|format(empresa.lucro_liquido or 0) }}
-                    </td>
-                    <td class="px-4 py-4 rounded-r-2xl flex justify-end gap-2">
-                        <a href="{{ url_for('editar_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
-                            <span class="material-symbols-outlined">edit</span>
-                        </a>
-                        <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" style="color: var(--precision-red)">
-                            <span class="material-symbols-outlined">delete</span>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="glass-card overflow-hidden !p-0">
+        <div class="p-6 border-b border-white/5">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-white/60">Terminais de Ativos</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-black text-[10px] uppercase tracking-widest text-white/40">
+                    <tr>
+                        <th class="px-8 py-4">Ticker</th>
+                        <th class="px-8 py-4">Empresa</th>
+                        <th class="px-8 py-4">Cotação Atual</th>
+                        <th class="px-8 py-4 text-right">Lucro/Perda (R$)</th>
+                        <th class="px-8 py-4 text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for empresa in empresas %}
+                    <tr class="hover:bg-white/5 transition-all group">
+                        <td class="px-8 py-4 font-black text-neon-red">{{ empresa.ticker }}</td>
+                        <td class="px-8 py-4 text-xs font-bold uppercase text-white/70">{{ empresa.empresa }}</td>
+                        <td class="px-8 py-4 text-xs text-white">
+                             R$ {{ "%.2f"|format(empresa.preco_atual_b3 or empresa.preco_acao) }}
+                        </td>
+                        <td class="px-8 py-4 text-right font-black {% if (empresa.variacao_valor|float) >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                            R$ {{ "%.2f"|format(empresa.variacao_valor or 0) }}
+
+                            <!-- ADICIONADO: Ícones de tendência -->
+                            {% if (empresa.variacao_valor|float) > 0 %}
+                                <span class="material-symbols-outlined text-[14px] align-middle ml-1">trending_up</span>
+                            {% elif (empresa.variacao_valor|float) < 0 %}
+                                <span class="material-symbols-outlined text-[14px] align-middle ml-1">trending_down</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-8 py-4 text-center">
+                            <div class="flex justify-center gap-4">
+                                <a href="{{ url_for('editar_empresa', id=empresa.id) }}" class="text-white/20 hover:text-white transition">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </a>
+                                <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" class="text-white/20 hover:text-red-600 transition">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
     </div>
 
 </div>
+
+<!-- 1. Certifique-se de que esta linha está no topo do arquivo (ou antes do script) -->
+<script src="https://jsdelivr.net"></script>
+
+<!-- Garanta que este script esteja no topo do bloco ou antes do código abaixo -->
+<script src="https://jsdelivr.net"></script>
+
+<script>
+    // Usamos um bloco try/catch para o erro não "apagar" a tela
+    try {
+        const ctx = document.getElementById('lucroChart').getContext('2d');
+
+        // Criando o efeito de degradê
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(249, 168, 177, 0.4)'); // Rosa visível
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');         // Termina no preto
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for e in empresas %}"{{ e.ticker }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for e in empresas %}{{ e.variacao_valor or 0 }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    borderColor: '#f9a8b1',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#c00014',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }, // Linhas cinzas sutis
+                        ticks: { color: '#666' }
+                    },
+                    x: {
+                        display: false // Remove os nomes conforme solicitado
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Erro ao carregar o gráfico:", e);
+    }
+</script>
+
+
+
+
+
+
+
 
 {% endblock %}

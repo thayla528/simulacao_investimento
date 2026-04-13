@@ -56,6 +56,64 @@ def taxas_tesouro():
         return []
 
 
+# --- ADICIONE ESTA FUNÇÃO AUXILIAR ANTES DAS ROTAS ---
+def obter_preco_atual(ticker):
+    try:
+        # Formata o ticker para o padrão Yahoo Finance (Ex: PETR4 -> PETR4.SA)
+        t = ticker.strip().upper()
+        if not t.endswith('.SA'):
+            t += '.SA'
+
+        acao = yf.Ticker(t)
+        # Puxa o histórico do último dia
+        dados = acao.history(period="1d")
+
+        if not dados.empty:
+            # Retorna o preço de fechamento mais recente
+            return round(dados['Close'].iloc[-1], 2)
+        return None
+    except Exception as e:
+        print(f"Erro ao buscar ticker {ticker}: {e}")
+        return None
+
+
+# --- MODIFIQUE SUA ROTA DE PERFIL ---
+@app.route("/perfil")
+def perfil():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM empresas WHERE usuario = ?", (session["usuario"],))
+    empresas_rows = cursor.fetchall()
+
+    empresas_atualizadas = []
+    for row in empresas_rows:
+        empresa = dict(row)
+        ticker = empresa['ticker'].strip().upper()
+        preco_b3 = obter_preco_atual(ticker)
+
+        # Garante que a dívida seja um float para o JS
+        empresa['divida'] = float(empresa.get('divida') or 0)
+
+        if preco_b3:
+            preco_custo = float(empresa['preco_acao'] or 0)
+            quantidade = int(empresa['num_acoes'] or 0)
+            empresa['preco_atual_b3'] = preco_b3
+            empresa['variacao_valor'] = round((preco_b3 - preco_custo) * quantidade, 2)
+        else:
+            empresa['preco_atual_b3'] = empresa['preco_acao']
+            empresa['variacao_valor'] = 0
+
+        empresas_atualizadas.append(empresa)
+
+    conn.close()
+    return render_template("perfil.html", usuario=session["usuario"], empresas=empresas_atualizadas, os=os)
+
+
+
+
 # ------------------ CADASTRO DE USUÁRIO ------------------
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
@@ -76,22 +134,6 @@ def cadastro():
             conn.close()
     return render_template("cadastro.html")
 
-# ------------------ PERFIL ------------------
-# ------------------ PERFIL (INDIVIDUAL POR USUÁRIO) ------------------
-@app.route("/perfil")
-def perfil():
-    if "usuario" not in session:
-        return redirect(url_for("login"))
-
-    conn = conectar()
-    cursor = conn.cursor()
-
-    # Adicionado WHERE usuario = ? para mostrar apenas os dados de quem está logado
-    cursor.execute("SELECT * FROM empresas WHERE usuario = ?", (session["usuario"],))
-    empresas = cursor.fetchall()
-    conn.close()
-
-    return render_template("perfil.html", usuario=session["usuario"], empresas=empresas, os=os)
 
 
 # ------------------ UPLOAD DE FOTO ------------------
