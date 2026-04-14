@@ -4,10 +4,11 @@
 <style>
 :root {
     --precision-red: #c00014;
-    --pink-baby: #1c1b1b; /* Tom escuro para bordas */
+    --pink-baby: #1c1b1b;
     --pink-text: #f9a8b1;
 }
 
+/* Fundo Dark Consistente */
 body {
     background-color: #000000 !important;
     background-image: radial-gradient(#111 1px, transparent 1px) !important;
@@ -26,6 +27,7 @@ body {
     background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
 }
 
+/* Estilo da Tabela Dark */
 .table-precision {
     width: 100%;
     border-collapse: separate;
@@ -64,6 +66,7 @@ body {
 .table-precision tbody td:first-child { border-left: 1px solid #1c1b1b; border-radius: 12px 0 0 12px; }
 .table-precision tbody td:last-child { border-right: 1px solid #1c1b1b; border-radius: 0 12px 12px 0; }
 
+/* Inputs do Modal */
 .input-precision {
     background-color: #0e0e0e !important;
     border: 1px solid #2a2a2a !important;
@@ -76,20 +79,22 @@ body {
 .input-precision:focus {
     border-color: var(--precision-red) !important;
     outline: none;
+    box-shadow: 0 0 8px rgba(192, 0, 20, 0.3);
 }
 
 .modal-overlay {
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(0,0,0,0.85);
     backdrop-filter: blur(8px);
 }
 
+/* Animação da Lupa */
 .animate-spin-slow {
     animation: spin 1s linear infinite;
 }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
 
-<div class="max-w-7xl mx-auto mt-16 px-4 pb-20">
+<div class="max-w-7xl mx-auto px-4 pb-20 mt-10">
 
     <!-- HEADER -->
     <div class="flex justify-between items-center mb-12">
@@ -98,7 +103,7 @@ body {
                 <span class="text-gradient-pink-red">Gerenciamento de Ativos</span>
             </h1>
             <p class="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase mt-1">
-                PRECISION INVEST • TERMINAL
+                PRECISION INVEST • TERMINAL OPERACIONAL
             </p>
         </div>
 
@@ -123,7 +128,6 @@ body {
                     <th>Patrimônio</th>
                     <th>Ativos</th>
                     <th>Dívida</th>
-                    <th>Lote</th>
                     <th>Tipo</th>
                     <th>V. Mercado</th>
                     <th>AÇÕES</th>
@@ -134,19 +138,18 @@ body {
                     {% for empresa in empresas %}
                     <tr class="table-row-precision">
                         <td class="font-black text-white uppercase">{{ empresa.ticker }}</td>
-                        <td class="text-gray-400">{{ empresa.empresa }}</td>
-                        <td class="text-gray-400">{{ empresa.setor }}</td>
+                        <td class="text-gray-400 text-[10px] uppercase">{{ empresa.empresa }}</td>
+                        <td class="text-gray-500">{{ empresa.setor }}</td>
                         <td class="text-gray-400">{{ empresa.num_acoes or 0 }}</td>
-                        <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.preco_acao or 0) }}</td>
+                        <td class="text-gray-300">R$ {{ "%.2f"|format(empresa.preco_acao or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.lucro_liquido or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.patrimonio or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.ativos or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.divida or 0) }}</td>
-                        <td class="text-gray-400">{{ empresa.lote or 0 }}</td>
-                        <td class="text-gray-400">{{ empresa.tipo_acao }}</td>
-                        <td class="text-white font-bold">R$ {{ "%.2f"|format((empresa.num_acoes or 0) * (empresa.preco_acao or 0)) }}</td>
+                        <td class="text-gray-500 text-[9px] font-bold">{{ empresa.tipo_acao }}</td>
+                        <td class="text-white font-black">R$ {{ "%.2f"|format((empresa.num_acoes or 0) * (empresa.preco_acao or 0)) }}</td>
                         <td>
-                            <div class="flex justify-center gap-2">
+                            <div class="flex justify-center gap-3">
                                 <a href="{{ url_for('editar_empresa', id=empresa.id) }}" class="text-white/20 hover:text-white transition">
                                     <span class="material-symbols-outlined text-lg">edit</span>
                                 </a>
@@ -159,14 +162,14 @@ body {
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="13" class="text-center py-20 text-white/10 uppercase tracking-widest text-xs">Nenhum ativo no terminal.</td>
+                        <td colspan="12" class="text-center py-20 text-white/10 uppercase tracking-widest text-xs">Nenhum ativo listado no terminal.</td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
     </div>
 
-    <!-- INDICADORES -->
+    <!-- INDICADORES DE PERFORMANCE -->
     <div class="mt-16">
         <h2 class="text-xl font-black text-gradient-pink-red uppercase mb-6 tracking-tighter">Indicadores de Performance</h2>
         <div class="overflow-x-auto">
@@ -199,48 +202,54 @@ body {
     </div>
 </div>
 
-<!-- MODAL DARK -->
+<!-- MODAL COM BUSCA AUTOMÁTICA -->
 <div id="modalCadastro" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-overlay">
-    <div class="bg-[#0e0e0e] w-[420px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-10 max-h-[90vh] overflow-y-auto">
+    <div class="bg-[#0e0e0e] w-[420px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-10 max-h-[95vh] overflow-y-auto">
 
         <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
                 class="absolute top-6 right-6 text-white/20 hover:text-white transition text-2xl">✕</button>
 
         <div class="text-center mb-8">
-            <h3 class="font-black text-gradient-pink-red text-xl uppercase tracking-tighter">Novo_Ativo</h3>
-            <p class="text-[9px] text-white/20 mt-1 uppercase font-bold tracking-widest">Conexão direta com Terminal B3</p>
+            <h3 class="font-black text-gradient-pink-red text-xl uppercase tracking-tighter">Novo_Registro</h3>
+            <p class="text-[9px] text-white/20 mt-1 uppercase font-bold tracking-widest">Sincronização com Terminal B3</p>
         </div>
 
         <form action="{{ url_for('cadastrar_empresa') }}" method="POST" class="space-y-4">
 
-            <div class="flex gap-2">
-                <input type="text" name="ticker" id="input_ticker" placeholder="TICKER (EX: PETR4)" class="w-full input-precision uppercase" required>
-                <button type="button" onclick="buscarDadosB3()" class="bg-gradient-pink-red text-white px-4 rounded-md hover:brightness-110 transition flex items-center">
-                    <span class="material-symbols-outlined text-sm" id="icon_lupa">search</span>
-                </button>
+            <!-- CAMPO TICKER COM LUPA -->
+            <div>
+                <label class="text-[9px] font-black text-red-600 uppercase ml-2 mb-1 block tracking-widest">Ticker do Ativo</label>
+                <div class="flex gap-2">
+                    <input type="text" name="ticker" id="input_ticker" placeholder="EX: PETR4"
+                           class="w-full input-precision uppercase" required>
+                    <button type="button" onclick="buscarDadosB3()"
+                            class="bg-gradient-pink-red text-white px-4 rounded-md hover:brightness-110 transition flex items-center">
+                        <span class="material-symbols-outlined text-sm" id="icon_lupa">search</span>
+                    </button>
+                </div>
             </div>
 
             <input type="text" name="empresa" id="input_empresa" placeholder="NOME DA EMPRESA" class="w-full input-precision" required>
             <input type="text" name="setor" id="input_setor" placeholder="SETOR" class="w-full input-precision" required>
 
-            <div class="grid grid-cols-2 gap-3">
-                <input type="number" name="num_acoes" id="input_num_acoes" placeholder="QTD AÇÕES" class="input-precision" required>
-                <input type="number" step="0.01" name="preco_acao" id="input_preco" placeholder="PREÇO (R$)" class="input-precision" required>
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" name="num_acoes" id="input_num_acoes" placeholder="QTD AÇÕES" class="w-full input-precision" required>
+                <input type="number" step="0.01" name="preco_acao" id="input_preco" placeholder="PREÇO (R$)" class="w-full input-precision" required>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <input type="number" step="0.01" name="lucro_liquido" id="input_lucro" placeholder="LUCRO LÍQ." class="input-precision">
-                <input type="number" step="0.01" name="patrimonio" id="input_patrimonio" placeholder="PATRIMÔNIO" class="input-precision">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" step="0.01" name="lucro_liquido" id="input_lucro" placeholder="LUCRO LÍQ." class="w-full input-precision">
+                <input type="number" step="0.01" name="patrimonio" id="input_patrimonio" placeholder="PATRIMÔNIO" class="w-full input-precision">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <input type="number" step="0.01" name="ativos" id="input_ativos" placeholder="ATIVOS" class="input-precision">
-                <input type="number" step="0.01" name="divida" id="input_divida" placeholder="DÍVIDA" class="input-precision">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" step="0.01" name="ativos" id="input_ativos" placeholder="ATIVOS" class="w-full input-precision">
+                <input type="number" step="0.01" name="divida" id="input_divida" placeholder="DÍVIDA" class="w-full input-precision">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <input type="number" name="lote" value="100" placeholder="LOTE" class="input-precision">
-                <select name="tipo_acao" class="input-precision text-[10px]">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" name="lote" value="100" placeholder="LOTE" class="w-full input-precision">
+                <select name="tipo_acao" class="w-full input-precision text-[9px] font-bold">
                     <option value="ON">ON</option>
                     <option value="PN">PN</option>
                     <option value="UNIT">UNIT</option>
@@ -270,8 +279,9 @@ async function buscarDadosB3() {
         const data = await response.json();
 
         if (data.erro) {
-            alert("Ticker não encontrado na B3.");
+            alert("Ativo não encontrado no Terminal B3.");
         } else {
+            // Preenchimento Automático usando os dados da sua rota Python
             document.getElementById('input_empresa').value = data.nome || "";
             document.getElementById('input_setor').value = data.setor || "";
             document.getElementById('input_preco').value = data.preco || "";
@@ -280,8 +290,8 @@ async function buscarDadosB3() {
             document.getElementById('input_ativos').value = data.ativos || 0;
             document.getElementById('input_divida').value = data.divida || 0;
         }
-    } catch (error) {
-        console.error("Erro:", error);
+    } catch (e) {
+        console.error("Erro na sincronização");
     } finally {
         icon.innerHTML = "search";
         icon.classList.remove("animate-spin-slow");

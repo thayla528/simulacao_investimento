@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html class="light" lang="pt-br">
+<html class="dark" lang="pt-br">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Precision Invest - Login</title>
 
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
 <script>
 tailwind.config = {
     theme: {
         extend: {
             colors: {
-                primary: "#c00014",
-                "primary-fixed-dim": "#ffb4ab",
-                "surface": "#f9f9f9",
-                "surface-container-low": "#f3f3f3",
-                "surface-container-lowest": "#ffffff",
-                "surface-bright": "#f9f9f9",
-                "on-surface": "#1a1c1c",
-                "outline": "#827473",
-                "secondary-container": "#fecbcb"
+                primary: "#c00014", // Vermelho
+                "primary-fixed-dim": "#f9a8b1", // Rosa
+                "surface": "#000000",
+                "surface-container-low": "#0e0e0e",
+                "on-surface": "#e5e2e1",
             },
             fontFamily: {
                 headline: ["Manrope"],
@@ -34,8 +29,42 @@ tailwind.config = {
 </script>
 
 <style>
-.neon-quartz-glow {
-    box-shadow: 0 0 20px rgba(192, 0, 20, 0.1), 0 0 40px rgba(254, 203, 203, 0.2);
+/* Fundo radial dark */
+body {
+    background-color: #000000 !important;
+    background-image: radial-gradient(#111 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+}
+
+/* Estilo do Card contornado de Vermelho */
+.login-card {
+    background-color: rgba(8, 8, 8, 0.9);
+    border: 2px solid #c00014;
+    box-shadow: 0 0 20px rgba(192, 0, 20, 0.2);
+}
+
+/* Campos Rosa que mudam para Vermelho no clique */
+.input-precision {
+    background-color: #0e0e0e !important;
+    border: 1px solid #f9a8b1 !important; /* Borda Rosa */
+    color: #f9a8b1 !important; /* Texto Rosa */
+    transition: all 0.3s ease;
+}
+
+.input-precision:focus {
+    border-color: #c00014 !important; /* Borda muda para Vermelho */
+    color: #ffffff !important; /* Texto muda para Branco */
+    box-shadow: 0 0 12px rgba(192, 0, 20, 0.4);
+    outline: none;
+}
+
+/* Placeholder Rosa */
+.input-precision::placeholder {
+    color: rgba(249, 168, 177, 0.4);
+}
+
+.neon-glow {
+    box-shadow: 0 0 20px rgba(192, 0, 20, 0.3);
 }
 </style>
 
@@ -43,59 +72,75 @@ tailwind.config = {
 
 <body class="bg-surface font-body text-on-surface">
 
-<header class="fixed top-0 w-full flex justify-between items-center px-6 h-16 bg-surface-bright">
-    <h1 class="text-xl font-extrabold text-primary">Precision Invest</h1>
+<header class="fixed top-0 w-full flex justify-between items-center px-6 h-16 bg-black/50 backdrop-blur-md border-b border-white/5">
+    <h1 class="text-xl font-black uppercase tracking-tighter text-primary-fixed-dim">Precision Invest</h1>
 </header>
 
-<main class="min-h-screen pt-20 flex justify-center items-center px-6">
+<main class="min-h-screen flex justify-center items-center px-6">
 
-<section class="w-full max-w-sm space-y-10">
+<!-- CARD COM CONTORNO VERMELHO -->
+<section class="w-full max-w-sm login-card p-8 rounded-2xl space-y-10">
 
-<div>
-    <h1 class="text-3xl font-bold">
-        Acesse seu <span class="text-primary">Terminal</span>
-    </h1>
-</div>
+    <!-- BLOCO DE MENSAGENS FLASH (ADICIONADO) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-2">
+          {% for category, message in messages %}
+            <div class="p-3 rounded-lg border text-[10px] font-bold uppercase tracking-widest text-center
+                {% if category == 'danger' %} border-primary text-primary bg-primary/10
+                {% else %} border-primary-fixed-dim text-primary-fixed-dim bg-primary-fixed-dim/10 {% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
-<!-- 🔥 FORM FLASK -->
-<form method="POST" class="space-y-6">
-
-    <!-- EMAIL -->
-    <div>
-        <label class="text-sm text-gray-500">Email</label>
-        <input
-            type="email"
-            name="form-email"
-            required
-            placeholder="nome@email.com"
-            class="w-full p-4 rounded-lg bg-surface-container-low focus:outline-none"
-        >
+    <div class="text-center">
+        <h1 class="text-3xl font-black uppercase tracking-tighter">
+            Acesse seu <span class="text-primary">Terminal</span>
+        </h1>
     </div>
 
-    <!-- SENHA -->
-    <div>
-        <label class="text-sm text-gray-500">Senha</label>
-        <input
-            type="password"
-            name="form-senha"
-            required
-            placeholder="••••••••"
-            class="w-full p-4 rounded-lg bg-surface-container-low focus:outline-none"
-        >
-    </div>
+    <!-- 🔥 FORM FLASK -->
+    <form method="POST" class="space-y-6">
 
-    <!-- BOTÃO -->
-    <button class="w-full h-14 bg-gradient-to-br from-primary to-primary-fixed-dim text-white font-bold rounded-lg neon-quartz-glow">
-        Entrar
-    </button>
+        <!-- EMAIL -->
+        <div>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Email</label>
+            <input
+                type="email"
+                name="form-email"
+                required
+                placeholder="nome@email.com"
+                class="w-full p-4 rounded-lg input-precision"
+            >
+        </div>
 
-</form>
+        <!-- SENHA -->
+        <div>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Senha</label>
+            <input
+                type="password"
+                name="form-senha"
+                required
+                placeholder="••••••••"
+                class="w-full p-4 rounded-lg input-precision"
+            >
+        </div>
 
-<!-- CADASTRO -->
-<p class="text-center text-sm mt-4">
-    Não tem conta?
-    <a href="/cadastro" class="text-primary font-bold">Cadastrar</a>
-</p>
+        <!-- BOTÃO -->
+        <button type="submit" class="w-full h-14 bg-gradient-to-br from-primary-fixed-dim to-primary text-white font-black uppercase tracking-widest rounded-lg neon-glow hover:brightness-110 transition-all active:scale-95">
+            Entrar
+        </button>
+
+    </form>
+
+    <!-- CADASTRO -->
+    <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
+        Não tem conta?
+        <a href="/cadastro" class="text-primary-fixed-dim hover:text-primary transition-colors">Cadastrar</a>
+    </p>
 
 </section>
 

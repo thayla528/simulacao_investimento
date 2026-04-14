@@ -2,7 +2,19 @@ from flask import Flask, render_template, session, request, redirect, url_for, f
 import os
 from banco import conectar  # banco.py deve conter conectar() e criar_tabela()
 import yfinance as yf
-import pandas as pd
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "usuario" not in session:
+            flash("Por favor, faça login para acessar esta página.", "warning")
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 
 app = Flask(__name__)
 app.secret_key = "chave_secreta"
@@ -12,16 +24,21 @@ app.secret_key = "chave_secreta"
 def login():
     if request.method == "POST":
         email = request.form.get("form-email")
-        senha = request.form.get("form-senha")
+        senha_digitada = request.form.get("form-senha")
+
         conn = conectar()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE email=? AND senha=?", (email, senha))
+        # Buscamos apenas pelo e-mail
+        cursor.execute("SELECT * FROM usuarios WHERE email=?", (email,))
         usuario = cursor.fetchone()
         conn.close()
-        if usuario:
+
+        # Verificamos se o usuário existe e se o hash da senha confere
+        if usuario and check_password_hash(usuario['senha'], senha_digitada):
             session["usuario"] = usuario['nome']
             return redirect(url_for("perfil"))
-        flash("Erro no login", "danger")
+
+        flash("E-mail ou senha incorretos", "danger")
     return render_template("login.html")
 
 
@@ -79,6 +96,7 @@ def obter_preco_atual(ticker):
 
 # --- MODIFIQUE SUA ROTA DE PERFIL ---
 @app.route("/perfil")
+@login_required
 def perfil():
     if "usuario" not in session:
         return redirect(url_for("login"))
@@ -120,11 +138,17 @@ def cadastro():
     if request.method == "POST":
         nome = request.form.get("nome")
         email = request.form.get("email")
-        senha = request.form.get("senha")
+        senha_plana = request.form.get("senha")
+
+        # Gera o hash da senha (nunca salve a senha direta!)
+        senha_com_hash = generate_password_hash(senha_plana)
+
         conn = conectar()
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)", (nome, email, senha))
+            # Salvamos a senha criptografada (hash)
+            cursor.execute("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
+                           (nome, email, senha_com_hash))
             conn.commit()
             flash("Cadastro realizado com sucesso!", "success")
             return redirect(url_for("login"))
@@ -135,9 +159,9 @@ def cadastro():
     return render_template("cadastro.html")
 
 
-
 # ------------------ UPLOAD DE FOTO ------------------
 @app.route("/upload_foto", methods=["POST"])
+@login_required
 def upload_foto():
     if "usuario" not in session:
         return redirect(url_for("login"))
@@ -159,6 +183,7 @@ def upload_foto():
 
 # ------------------ CADASTRO DE AÇÕES ------------------
 @app.route("/cadastro_de_acao")
+@login_required
 def cadastro_de_acao():
     if "usuario" not in session:
 
@@ -173,6 +198,7 @@ def cadastro_de_acao():
 
 
 @app.route('/simulador', methods=['GET', 'POST'], endpoint='simulador')
+@login_required
 def investimentos():
     if "usuario" not in session:
         return redirect(url_for("login"))
@@ -204,6 +230,7 @@ def investimentos():
 
 # ------------------ CADASTRAR EMPRESA ------------------
 @app.route("/cadastrar_empresa", methods=["POST"])
+@login_required
 def cadastrar_empresa():
     if "usuario" not in session:
         flash("Você precisa estar logado!", "warning")
