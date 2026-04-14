@@ -122,9 +122,16 @@ body {
                         <td class="text-gray-400">{{ inv.tempo }} meses</td>
                         <td class="text-green-500 font-black">R$ {{ "%.2f"|format(inv.lucro|float) }}</td>
                         <td>
-                            <a href="{{ url_for('excluir_simulador', id=inv.id) }}" class="text-white/20 hover:text-red-600 transition">
-                                <span class="material-symbols-outlined text-lg">delete</span>
-                            </a>
+                            <div class="flex justify-center gap-3">
+                                <!-- ÍCONE EDITAR -->
+                                <a href="{{ url_for('editar_simulador', id=inv.id) }}" class="text-white/20 hover:text-white transition">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </a>
+                                <!-- ÍCONE EXCLUIR -->
+                                <a href="{{ url_for('excluir_simulador', id=inv.id) }}" class="text-white/20 hover:text-red-600 transition">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% set ns.total_lucro = ns.total_lucro + (inv.lucro|float) %}
@@ -212,10 +219,5 @@ document.getElementById('formSimulador').onsubmit = function() {
         tempoInput.value = parseInt(tempoInput.value) * 12;
     }
 };
-
-window.onclick = function(event) {
-    const modal = document.getElementById('modalCadastro');
-    if (event.target === modal) modal.classList.add('hidden');
-}
 </script>
 {% endblock %}

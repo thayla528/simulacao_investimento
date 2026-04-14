@@ -118,26 +118,55 @@ body {
         </div>
 
         <!-- INDICADORES -->
+                <!-- INDICADORES -->
         <div class="flex flex-col gap-4">
+            <!-- Card de Empresas (Mantido) -->
             <div class="glass-card flex-1 flex flex-col justify-center border-l-4 border-precision">
                 <h3 class="text-4xl font-black text-white">{{ empresas|length }}</h3>
                 <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Empresas Monitoradas</p>
             </div>
 
+            <!-- CARD DIVIDIDO: LUCRO VS PERDA -->
             <div class="glass-card flex-1 flex flex-col justify-center border-l-4" style="border-left-color: var(--pink-text)">
-                {% set ns = namespace(total_p_l=0) %}
+                {% set ns = namespace(lucro_total=0, perda_total=0) %}
                 {% for empresa in empresas %}
-                    {% set ns.total_p_l = ns.total_p_l + (empresa.variacao_valor|float(default=0)) %}
+                    {% set variacao = empresa.variacao_valor|float(default=0) %}
+                    {% if variacao > 0 %}
+                        {% set ns.lucro_total = ns.lucro_total + variacao %}
+                    {% else %}
+                        {% set ns.perda_total = ns.perda_total + variacao %}
+                    {% endif %}
                 {% endfor %}
-                <h3 class="text-4xl font-black {% if ns.total_p_l >= 0 %}text-green-500{% else %}text-red-600{% endif %}">
-                    R$ {{ "%.2f"|format(ns.total_p_l) }}
-                </h3>
-                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Lucro em Tempo Real</p>
-                <div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
-                    <div class="bg-precision h-full w-2/3"></div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Lado do Lucro -->
+                    <div>
+                        <p class="text-[9px] uppercase font-bold text-green-500/60 tracking-tighter mb-1">Lucro Acumulado</p>
+                        <h3 class="text-xl font-black text-green-500">
+                            R$ {{ "%.2f"|format(ns.lucro_total) }}
+                        </h3>
+                    </div>
+                    <!-- Lado da Perda -->
+                    <div class="border-l border-white/10 pl-4">
+                        <p class="text-[9px] uppercase font-bold text-red-500/60 tracking-tighter mb-1">Perda em Aberto</p>
+                        <h3 class="text-xl font-black text-red-500">
+                            R$ {{ "%.2f"|format(ns.perda_total) }}
+                        </h3>
+                    </div>
                 </div>
+
+                <!-- Barra de Progresso Visual (Lucro vs Perda) -->
+                <div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden flex">
+                    {% set total_abs = (ns.lucro_total + ns.perda_total|abs) %}
+                    {% if total_abs > 0 %}
+                        <div class="bg-green-500 h-full" style="width: {{ (ns.lucro_total / total_abs * 100) }}%"></div>
+                        <div class="bg-red-600 h-full" style="width: {{ (ns.perda_total|abs / total_abs * 100) }}%"></div>
+                    {% endif %}
+                </div>
+                <p class="text-[8px] uppercase font-bold text-white/20 tracking-[0.3em] mt-2 text-center">Balanço de Ativos B3</p>
             </div>
         </div>
+
     </div>
 
     <!-- TABELA -->
