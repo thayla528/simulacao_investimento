@@ -61,6 +61,15 @@
     background-color: rgba(0,0,0,0.4);
     backdrop-filter: blur(4px);
 }
+
+/* Animação para a lupa */
+.animate-spin-slow {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 </style>
 
 <div class="max-w-7xl mx-auto px-4 pb-20">
@@ -163,7 +172,7 @@
         </table>
     </div>
 
-    <!-- ✅ INDICADORES (ADICIONADO SEM MUDAR NADA) -->
+    <!-- INDICADORES -->
     <div class="overflow-x-auto mt-10">
         <table class="table-precision">
             <thead>
@@ -220,88 +229,122 @@
         <!-- FORMULÁRIO -->
         <form action="{{ url_for('cadastrar_empresa') }}" method="POST" class="space-y-4">
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">label</span>
-                <input name="ticker" placeholder="Ticker (Ex: PETR4)" class="input-precision flex-1" required>
+            <!-- TICKER COM LUPA -->
+            <div>
+                <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Ticker</label>
+                <div class="flex gap-2">
+                    <input type="text" name="ticker" id="input_ticker" placeholder="EX: PETR4"
+                           class="input-precision w-full uppercase" required>
+                    <button type="button" onclick="buscarDadosB3()"
+                            class="bg-gradient-pink-red text-white px-3 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm" id="icon_lupa">search</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">business</span>
-                <input name="empresa" placeholder="Nome da Empresa" class="input-precision flex-1" required>
+            <div>
+                <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Empresa</label>
+                <input type="text" name="empresa" id="input_empresa" class="input-precision w-full" required>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">apartment</span>
-                <input name="setor" placeholder="Setor (Ex: Energia)" class="input-precision flex-1" required>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Setor</label>
+                    <input type="text" name="setor" id="input_setor" class="input-precision w-full" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Qtd Ações</label>
+                    <input type="number" name="num_acoes" id="input_num_acoes" class="input-precision w-full" required>
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">inventory_2</span>
-                <input type="number" name="num_acoes" placeholder="Qtd Ações" class="input-precision flex-1" required>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Preço Ação</label>
+                    <input type="number" step="0.01" name="preco_acao" id="input_preco" class="input-precision w-full" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Lucro Líquido</label>
+                    <input type="number" step="0.01" name="lucro_liquido" id="input_lucro" class="input-precision w-full">
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">attach_money</span>
-                <input type="number" step="0.01" name="preco_acao" placeholder="Preço" class="input-precision flex-1" required>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Patrimônio</label>
+                    <input type="number" step="0.01" name="patrimonio" id="input_patrimonio" class="input-precision w-full">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Ativos</label>
+                    <input type="number" step="0.01" name="ativos" id="input_ativos" class="input-precision w-full">
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">trending_up</span>
-                <input type="number" step="0.01" name="lucro_liquido" placeholder="Lucro" class="input-precision flex-1">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Dívida</label>
+                    <input type="number" step="0.01" name="divida" id="input_divida" class="input-precision w-full">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Lote</label>
+                    <input type="number" name="lote" value="100" class="input-precision w-full">
+                </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">account_balance</span>
-                <input type="number" step="0.01" name="patrimonio" placeholder="Patrimônio" class="input-precision flex-1">
+            <div>
+                <label class="block text-[10px] font-black text-pink-500 mb-1 ml-2 uppercase">Tipo de Ação</label>
+                <select name="tipo_acao" class="input-precision w-full">
+                    <option value="ON">ON (Ordinária)</option>
+                    <option value="PN">PN (Preferencial)</option>
+                    <option value="UNIT">UNIT</option>
+                </select>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">savings</span>
-                <input type="number" step="0.01" name="ativos" placeholder="Ativos" class="input-precision flex-1">
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">report</span>
-                <input type="number" step="0.01" name="divida" placeholder="Dívida" class="input-precision flex-1">
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">inventory</span>
-                <input type="number" name="lote" value="100" class="input-precision flex-1" required>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-pink-500">category</span>
-                <input name="tipo_acao" placeholder="Tipo" class="input-precision flex-1" required>
-            </div>
-
-            <!-- BOTÕES -->
-            <div class="flex justify-between gap-3 mt-4">
-                <button type="submit" class="bg-gradient-pink-red text-white w-1/2 py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:brightness-110 transition">
-                    <span class="material-symbols-outlined">save</span> SALVAR
-                </button>
-
-                <button type="button" onclick="document.getElementById('modalCadastro').classList.add('hidden')"
-                        class="bg-gray-200 text-gray-700 w-1/2 py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-300 transition">
-                    <span class="material-symbols-outlined">cancel</span> CANCELAR
-                </button>
-            </div>
+            <button type="submit" class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-2xl shadow-lg uppercase text-xs mt-2">
+                Cadastrar Ativo
+            </button>
 
         </form>
     </div>
 </div>
 
 <script>
-window.onclick = function(event) {
-    const modal = document.getElementById('modalCadastro');
-    if (event.target == modal) modal.classList.add('hidden');
-}
-</script>
+async function buscarDadosB3() {
+    const tickerInput = document.getElementById('input_ticker');
+    const icon = document.getElementById('icon_lupa');
+    const ticker = tickerInput.value.trim();
 
-<script>
-window.onclick = function(event) {
-    const modal = document.getElementById('modalCadastro');
-    if (event.target == modal) modal.classList.add('hidden');
+    if (!ticker) {
+        alert("Por favor, digite um ticker (Ex: PETR4)");
+        return;
+    }
+
+    icon.innerHTML = "sync";
+    icon.classList.add("animate-spin-slow");
+
+    try {
+        const response = await fetch(`/buscar_acao/${ticker}`);
+        const data = await response.json();
+
+        if (data.erro) {
+            alert("Ativo não encontrado na B3.");
+        } else {
+            // Mapeamento baseado na sua rota do Python
+            document.getElementById('input_empresa').value = data.nome || "";
+            document.getElementById('input_setor').value = data.setor || "";
+            document.getElementById('input_preco').value = data.preco || "";
+            document.getElementById('input_lucro').value = data.lucro_liquido || 0;
+            document.getElementById('input_patrimonio').value = data.patrimonio || 0;
+            document.getElementById('input_ativos').value = data.ativos || 0;
+            document.getElementById('input_divida').value = data.divida || 0;
+        }
+    } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro ao conectar com o terminal.");
+    } finally {
+        icon.innerHTML = "search";
+        icon.classList.remove("animate-spin-slow");
+    }
 }
 </script>
 
