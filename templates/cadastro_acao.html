@@ -150,10 +150,10 @@ body {
                         <td class="text-white font-black">R$ {{ "%.2f"|format((empresa.num_acoes or 0) * (empresa.preco_acao or 0)) }}</td>
                         <td>
                             <div class="flex justify-center gap-3">
-                                <a href="{{ url_for('editar_empresa', id=empresa.id) }}" class="text-white/20 hover:text-white transition">
+                                <a href="{{ url_for('empresas.editar_empresa', id=empresa.id) }}" class="text-white/20 hover:text-white transition">
                                     <span class="material-symbols-outlined text-lg">edit</span>
                                 </a>
-                                <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" class="text-white/20 hover:text-red-600 transition">
+                                <a href="{{ url_for('empresas.excluir_empresa', id=empresa.id) }}" class="text-white/20 hover:text-red-600 transition">
                                     <span class="material-symbols-outlined text-lg">delete</span>
                                 </a>
                             </div>
@@ -202,63 +202,110 @@ body {
     </div>
 </div>
 
-<!-- MODAL COM BUSCA AUTOMÁTICA -->
+<!-- MODAL COM BUSCA AUTOMÁTICA (HORIZONTAL SEGURA) -->
 <div id="modalCadastro" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-overlay">
-    <div class="bg-[#0e0e0e] w-[420px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-10 max-h-[95vh] overflow-y-auto">
+
+    <div class="bg-[#0e0e0e] w-[900px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-12 max-h-[95vh] overflow-y-auto">
 
         <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
                 class="absolute top-6 right-6 text-white/20 hover:text-white transition text-2xl">✕</button>
 
-        <div class="text-center mb-8">
+        <div class="text-center mb-10">
             <h3 class="font-black text-gradient-pink-red text-xl uppercase tracking-tighter">Novo_Registro</h3>
             <p class="text-[9px] text-white/20 mt-1 uppercase font-bold tracking-widest">Sincronização com Terminal B3</p>
         </div>
 
-        <form action="{{ url_for('cadastrar_empresa') }}" method="POST" class="space-y-4">
+        <!-- FORM NÃO FOI MEXIDO -->
+        <form action="{{ url_for('empresas.cadastrar_empresa') }}" method="POST">
 
-            <!-- CAMPO TICKER COM LUPA -->
-            <div>
-                <label class="text-[9px] font-black text-red-600 uppercase ml-2 mb-1 block tracking-widest">Ticker do Ativo</label>
-                <div class="flex gap-2">
-                    <input type="text" name="ticker" id="input_ticker" placeholder="EX: PETR4"
-                           class="w-full input-precision uppercase" required>
-                    <button type="button" onclick="buscarDadosB3()"
-                            class="bg-gradient-pink-red text-white px-4 rounded-md hover:brightness-110 transition flex items-center">
-                        <span class="material-symbols-outlined text-sm" id="icon_lupa">search</span>
-                    </button>
+            <!-- SÓ O LAYOUT FOI ALTERADO (SAFE) -->
+            <div class="grid grid-cols-2 gap-10">
+
+                <!-- ESQUERDA -->
+                <div class="space-y-6">
+
+                    <div>
+                        <label class="text-[9px] font-black text-red-600 uppercase ml-2 mb-1 block tracking-widest">
+                            Ticker do Ativo
+                        </label>
+
+                        <div class="flex gap-2">
+                            <input type="text" name="ticker" id="input_ticker"
+                                   placeholder="EX: PETR4"
+                                   class="w-full input-precision uppercase" required>
+
+                            <button type="button" onclick="buscarDadosB3()"
+                                    class="bg-gradient-pink-red text-white px-4 rounded-md hover:brightness-110 transition flex items-center">
+                                <span class="material-symbols-outlined text-sm" id="icon_lupa">search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="text" name="empresa" id="input_empresa"
+                           placeholder="NOME DA EMPRESA"
+                           class="w-full input-precision" required>
+
+                    <input type="text" name="setor" id="input_setor"
+                           placeholder="SETOR"
+                           class="w-full input-precision" required>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="number" name="num_acoes" id="input_num_acoes"
+                               placeholder="QTD AÇÕES"
+                               class="w-full input-precision" required>
+
+                        <input type="number" name="lote"
+                               value="100"
+                               placeholder="LOTE"
+                               class="w-full input-precision">
+                    </div>
+
+                    <select name="tipo_acao"
+                            class="w-full input-precision text-[9px] font-bold">
+                        <option value="ON">ON</option>
+                        <option value="PN">PN</option>
+                        <option value="UNIT">UNIT</option>
+                    </select>
+
                 </div>
+
+                <!-- DIREITA -->
+                <div class="space-y-6">
+
+                    <input type="number" step="0.01" name="preco_acao"
+                           id="input_preco"
+                           placeholder="PREÇO (R$)"
+                           class="w-full input-precision" required>
+
+                    <input type="number" step="0.01" name="lucro_liquido"
+                           id="input_lucro"
+                           placeholder="LUCRO LÍQ."
+                           class="w-full input-precision">
+
+                    <input type="number" step="0.01" name="patrimonio"
+                           id="input_patrimonio"
+                           placeholder="PATRIMÔNIO"
+                           class="w-full input-precision">
+
+                    <input type="number" step="0.01" name="ativos"
+                           id="input_ativos"
+                           placeholder="ATIVOS"
+                           class="w-full input-precision">
+
+                    <input type="number" step="0.01" name="divida"
+                           id="input_divida"
+                           placeholder="DÍVIDA"
+                           class="w-full input-precision">
+
+                    <button type="submit"
+                            class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-sm shadow-lg mt-4 uppercase text-[10px] tracking-[0.2em] hover:brightness-110 transition">
+                        Registrar_Ativo
+                    </button>
+
+                </div>
+
             </div>
 
-            <input type="text" name="empresa" id="input_empresa" placeholder="NOME DA EMPRESA" class="w-full input-precision" required>
-            <input type="text" name="setor" id="input_setor" placeholder="SETOR" class="w-full input-precision" required>
-
-            <div class="grid grid-cols-2 gap-4">
-                <input type="number" name="num_acoes" id="input_num_acoes" placeholder="QTD AÇÕES" class="w-full input-precision" required>
-                <input type="number" step="0.01" name="preco_acao" id="input_preco" placeholder="PREÇO (R$)" class="w-full input-precision" required>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <input type="number" step="0.01" name="lucro_liquido" id="input_lucro" placeholder="LUCRO LÍQ." class="w-full input-precision">
-                <input type="number" step="0.01" name="patrimonio" id="input_patrimonio" placeholder="PATRIMÔNIO" class="w-full input-precision">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <input type="number" step="0.01" name="ativos" id="input_ativos" placeholder="ATIVOS" class="w-full input-precision">
-                <input type="number" step="0.01" name="divida" id="input_divida" placeholder="DÍVIDA" class="w-full input-precision">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <input type="number" name="lote" value="100" placeholder="LOTE" class="w-full input-precision">
-                <select name="tipo_acao" class="w-full input-precision text-[9px] font-bold">
-                    <option value="ON">ON</option>
-                    <option value="PN">PN</option>
-                    <option value="UNIT">UNIT</option>
-                </select>
-            </div>
-
-            <button type="submit" class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-sm shadow-lg mt-4 uppercase text-[10px] tracking-[0.2em] hover:brightness-110 transition">
-                Registrar_Ativo
-            </button>
         </form>
     </div>
 </div>

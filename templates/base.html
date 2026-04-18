@@ -3,13 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/style.css"/>
+<link rel="stylesheet" href="/static/css/style.css"/>
 <title>{% block title %}Precision Invest • Terminal{% endblock %}</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Fontes -->
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
@@ -26,7 +24,6 @@
         font-family: 'Inter', sans-serif;
     }
 
-    /* Scrollbar Dark */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #1c1b1b; border-radius: 10px; }
@@ -42,35 +39,33 @@
 
 <body class="bg-black text-gray-200">
 
-<!-- MAIN CONTENT -->
 <main>
     {% block conteudo %}
     {% endblock %}
 </main>
 
-<!-- NAVBAR FIXA INFERIOR DARK -->
 <nav class="fixed bottom-0 left-0 w-full z-[100] flex justify-around items-center px-6 h-24 bg-black/80 backdrop-blur-xl border-t border-white/5 shadow-[0px_-10px_30px_rgba(0,0,0,0.5)]">
 
-    <!-- Perfil -->
-    <a href="{{ url_for('perfil') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
+    <!-- PERFIL -->
+    <a href="{{ url_for('perfil.perfil') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
         <span class="material-symbols-outlined text-2xl">account_circle</span>
         <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Perfil</span>
     </a>
 
-    <!-- Cadastro de ações -->
-    <a href="{{ url_for('cadastro_de_acao') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
+    <!-- AÇÕES -->
+    <a href="{{ url_for('empresas.cadastro_de_acao') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
         <span class="material-symbols-outlined text-2xl">query_stats</span>
         <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Ativos</span>
     </a>
 
-    <!-- Renda Fixa -->
-    <a href="{{ url_for('simulador') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
+    <!-- SIMULADOR -->
+    <a href="{{ url_for('simulador.investimentos') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
         <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
         <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Renda Fixa</span>
     </a>
 
-    <!-- Botão de Sair (Estilo Especial) -->
-    <a href="{{ url_for('logout') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-red-950/30 group">
+    <!-- LOGOUT (AUTH) -->
+    <a href="{{ url_for('auth.logout') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-red-950/30 group">
         <span class="material-symbols-outlined text-2xl text-red-600 group-hover:scale-110 transition-transform">logout</span>
         <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1 text-red-600/60 group-hover:text-red-600">Sair</span>
     </a>
@@ -79,3 +74,5 @@
 
 </body>
 </html>
+
+

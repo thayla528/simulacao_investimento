@@ -1,18 +1,15 @@
 import sqlite3
 
-# ------------------ CONEXÃO ------------------
 def conectar():
-    conn = sqlite3.connect("banco.db")
+    conn = sqlite3.connect("database/banco.db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
-# ------------------ CRIAR TABELAS ------------------
 def criar_tabela():
     conn = conectar()
     cursor = conn.cursor()
 
-    # ------------------ USUÁRIOS ------------------
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +19,6 @@ def criar_tabela():
         )
     """)
 
-    # ------------------ EMPRESAS ------------------
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS empresas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +37,6 @@ def criar_tabela():
         )
     """)
 
-    # ------------------ INVESTIMENTOS ------------------
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS investimentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,11 +51,3 @@ def criar_tabela():
 
     conn.commit()
     conn.close()
-
-
-# ------------------ EXECUTAR ------------------
-if __name__ == "__main__":
-    criar_tabela()
-    print("Banco criado/atualizado com sucesso!")
-
-

@@ -122,7 +122,7 @@ body {
                         <td class="text-gray-400">{{ inv.tempo }} meses</td>
                         <td class="text-green-500 font-black">R$ {{ "%.2f"|format(inv.lucro|float) }}</td>
                         <td>
-                            <a href="{{ url_for('excluir_simulador', id=inv.id) }}" class="text-white/20 hover:text-red-600 transition">
+                            <a href="{{ url_for('simulador.excluir_simulador', id=inv.id) }}" class="text-white/20 hover:text-red-600 transition">
                                 <span class="material-symbols-outlined text-lg">delete</span>
                             </a>
                         </td>

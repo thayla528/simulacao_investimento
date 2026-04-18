@@ -9,67 +9,102 @@
         --dark-bg: #0b0e14;
     }
 
-    /* Estilos para Inputs Neon no seu padrão de cores */
+    body {
+        background: var(--dark-bg);
+    }
+
+    /* INPUTS */
     .input-precision {
-        background-color: var(--dark-bg) !important;
+        background-color: #12151c !important;
         color: var(--pink-text) !important;
-        border: 1px solid var(--precision-red) !important;
-        box-shadow: inset 0 0 5px rgba(192, 0, 20, 0.2);
+        border: 1px solid rgba(192, 0, 20, 0.6) !important;
         border-radius: 12px;
+        transition: 0.2s;
+    }
+
+    .input-precision:focus {
+        outline: none !important;
+        border-color: var(--precision-red) !important;
+        box-shadow: 0 0 10px rgba(192, 0, 20, 0.4);
     }
 
     .input-precision::placeholder {
         color: rgba(249, 168, 177, 0.5);
     }
 
-    /* Tabela de Ativos em estilo Cards Flutuantes */
+    /* TABELA */
     .table-precision {
         color: white !important;
         border-collapse: separate;
-        border-spacing: 0 12px;
+        border-spacing: 0 10px;
         width: 100%;
     }
 
     .table-precision tbody tr {
         background-color: #1a1d24;
-        transition: transform 0.2s, background-color 0.2s;
+        transition: all 0.2s ease;
+        border-radius: 12px;
     }
-
-    .table-precision tr td:first-child { border-radius: 15px 0 0 15px; }
-    .table-precision tr td:last-child { border-radius: 0 15px 15px 0; }
 
     .table-precision tbody tr:hover {
-        transform: scale(1.01);
-        background-color: #252a34;
-        box-shadow: 0 5px 15px rgba(192, 0, 20, 0.3);
+        transform: translateY(-2px);
+        background-color: #232833;
+        box-shadow: 0 8px 20px rgba(192, 0, 20, 0.15);
     }
 
-    .table-precision th, .table-precision td {
-        padding: 15px !important;
+    .table-precision th,
+    .table-precision td {
+        padding: 14px !important;
         vertical-align: middle;
         border: none !important;
     }
 
-    .neon-red-text {
-        color: var(--precision-red);
-        text-shadow: 0 0 10px rgba(192, 0, 20, 0.5);
-        font-weight: 900;
-        text-transform: uppercase;
+    .table-precision tr td:first-child {
+        border-radius: 12px 0 0 12px;
     }
 
+    .table-precision tr td:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    /* TEXTO NEON */
+    .neon-red-text {
+        color: var(--precision-red);
+        text-shadow: 0 0 8px rgba(192, 0, 20, 0.4);
+        font-weight: 900;
+        letter-spacing: 0.5px;
+    }
+
+    /* BOTÃO */
     .btn-precision {
-        background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
+        background: linear-gradient(135deg, var(--precision-red), #ff4d6d);
         border: none;
         border-radius: 30px;
-        font-weight: 900;
+        font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 1px;
-        transition: all 0.3s;
+        transition: all 0.3s ease;
     }
 
     .btn-precision:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0 20px rgba(192, 0, 20, 0.4);
+        box-shadow: 0 0 18px rgba(192, 0, 20, 0.35);
+    }
+
+    /* MODAL */
+    .modal-content {
+        background-color: #141821 !important;
+        border: 1px solid rgba(192, 0, 20, 0.6) !important;
+        border-radius: 20px !important;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* ICONES AÇÕES */
+    .btn-round {
+        border-radius: 10px !important;
     }
 </style>
 
@@ -77,57 +112,81 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl neon-red-text tracking-tighter">Gerenciamento de Ativos</h1>
-            <p class="text-[9px] font-black tracking-[0.4em] text-gray-500 uppercase">Precision Invest • Terminal</p>
+            <p class="text-[9px] font-black tracking-[0.4em] text-gray-500 uppercase">
+                Precision Invest • Terminal
+            </p>
         </div>
 
-        <!-- BOTÃO QUE ABRE O MODAL -->
-        <button type="button" class="btn btn-precision text-white px-4 py-2 mt-4" data-bs-toggle="modal" data-bs-target="#modalCadastro">
-          <i class="bi bi-plus-circle-fill"></i> Novo Ativo
+        <button type="button"
+            class="btn btn-precision text-white px-4 py-2 mt-4"
+            data-bs-toggle="modal"
+            data-bs-target="#modalCadastro">
+            <i class="bi bi-plus-circle-fill"></i> Novo Ativo
         </button>
     </div>
 
-    <!-- MODAL DE CADASTRO -->
-    <div class="modal fade" id="modalCadastro" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: #1a1d24; border: 2px solid var(--precision-red); border-radius: 25px;">
-          <div class="modal-header border-0">
-            <h1 class="modal-title fs-5 neon-red-text">Cadastrar Nova Empresa</h1>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form action="{{ url_for('cadastrar_empresa') }}" method="post">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="text-white small font-bold">Ticker:</label>
-                        <input placeholder="Ex: PETR4" name="ticker" class="form-control input-precision uppercase" required>
-                    </div>
-                    <div class="col-md-8 mb-3">
-                        <label class="text-white small font-bold">Nome da Empresa:</label>
-                        <input placeholder="Ex: Petrobras" name="empresa" class="form-control input-precision" required>
-                    </div>
+    <!-- MODAL -->
+    <div class="modal fade" id="modalCadastro" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header border-0">
+                    <h1 class="modal-title fs-5 neon-red-text">Cadastrar Nova Empresa</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mb-3">
-                    <label class="text-white small font-bold">Setor:</label>
-                    <input placeholder="Ex: Energia" name="setor" class="form-control input-precision" required>
+
+                <div class="modal-body">
+                    <form action="{{ url_for('cadastrar_empresa') }}" method="post">
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="text-white small fw-bold">Ticker:</label>
+                                <input name="ticker" placeholder="Ex: PETR4"
+                                    class="form-control input-precision text-uppercase" required>
+                            </div>
+
+                            <div class="col-md-8 mb-3">
+                                <label class="text-white small fw-bold">Nome da Empresa:</label>
+                                <input name="empresa" placeholder="Ex: Petrobras"
+                                    class="form-control input-precision" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-white small fw-bold">Setor:</label>
+                            <input name="setor" placeholder="Ex: Energia"
+                                class="form-control input-precision" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-white small fw-bold">Preço Ação (R$):</label>
+                                <input type="number" step="0.01"
+                                    name="preco_acao"
+                                    class="form-control input-precision" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="text-white small fw-bold">Lucro Líquido (R$):</label>
+                                <input type="number" step="0.01"
+                                    name="lucro_liquido"
+                                    class="form-control input-precision" required>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="btn btn-precision w-100 mt-3 text-white py-3">
+                            Salvar no Terminal
+                        </button>
+
+                    </form>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="text-white small font-bold">Preço Ação (R$):</label>
-                        <input type="number" step="0.01" name="preco_acao" class="form-control input-precision" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="text-white small font-bold">Lucro Líquido (R$):</label>
-                        <input type="number" step="0.01" name="lucro_liquido" class="form-control input-precision" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-precision w-100 mt-3 text-white py-3 shadow-lg">Salvar no Terminal</button>
-            </form>
-          </div>
+
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- TABELA DE ATIVOS -->
+    <!-- TABELA -->
     <div class="table-responsive mt-4">
         <table class="table table-precision">
             <thead>
@@ -140,34 +199,42 @@
                     <th class="text-right">Ações</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% for empresa in empresas %}
                 <tr class="text-sm">
                     <td class="fw-bold neon-red-text">{{ empresa.ticker }}</td>
-                    <td class="text-white uppercase font-bold">{{ empresa.empresa }}</td>
+                    <td class="text-white uppercase fw-bold">{{ empresa.empresa }}</td>
                     <td class="text-gray-400">{{ empresa.setor }}</td>
                     <td class="text-white">R$ {{ "%.2f"|format(empresa.preco_acao) }}</td>
                     <td class="text-success fw-bold">R$ {{ "%.2f"|format(empresa.lucro_liquido) }}</td>
-                    <td class="text-right">
-                        <div class="flex justify-end gap-2">
-                            <a href="{{ url_for('editar_empresa', id=empresa.id) }}" class="btn btn-sm btn-outline-light btn-round border-pink-200">
-                                <span class="material-symbols-outlined text-sm">edit</span>
+
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('editar_empresa', id=empresa.id) }}"
+                               class="btn btn-sm btn-outline-light btn-round">
+                                <span class="material-symbols-outlined">edit</span>
                             </a>
+
                             <a href="{{ url_for('excluir_empresa', id=empresa.id) }}"
                                class="btn btn-sm btn-outline-danger btn-round"
                                onclick="return confirm('Excluir {{ empresa.ticker }}?')">
-                                <span class="material-symbols-outlined text-sm">delete</span>
+                                <span class="material-symbols-outlined">delete</span>
                             </a>
                         </div>
                     </td>
                 </tr>
+
                 {% else %}
                 <tr>
-                    <td colspan="6" class="text-center text-gray-500 py-10">Nenhum ativo cadastrado no terminal.</td>
+                    <td colspan="6" class="text-center text-gray-500 py-10">
+                        Nenhum ativo cadastrado no terminal.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
 {% endblock %}

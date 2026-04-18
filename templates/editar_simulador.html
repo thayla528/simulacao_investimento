@@ -1,68 +1,301 @@
 {% extends 'base.html' %}
 
 {% block conteudo %}
+<style>
+:root {
+    --precision-red: #c00014;
+    --pink-text: #f9a8b1;
+}
 
+body {
+    background-color: #000 !important;
+    background-image: radial-gradient(#111 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+    color: #e5e2e1;
+}
 
-<div class="max-w-md mx-auto mt-20 px-4 pb-20">
+/* TITULOS */
+.text-gradient-pink-red {
+    background: linear-gradient(to right, var(--pink-text), var(--precision-red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* BOTÃO PRINCIPAL */
+.bg-gradient-pink-red {
+    background: linear-gradient(135deg, var(--pink-text), var(--precision-red));
+}
+
+/* =======================
+   TABELA (PADRÃO MODAL)
+======================= */
+
+.table-precision {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.table-precision thead th {
+    color: var(--precision-red);
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 15px;
+    border-bottom: 1px solid #1c1b1b;
+}
+
+.table-row-precision {
+    background-color: #0e0e0e;
+    border: 1px solid #1c1b1b;
+    transition: all 0.25s ease;
+}
+
+.table-row-precision:hover {
+    background-color: #111;
+    box-shadow: 0 0 12px rgba(192, 0, 20, 0.15);
+    transform: translateY(-1px);
+}
+
+.table-precision tbody td {
+    padding: 16px 10px;
+    text-align: center;
+    font-size: 12px;
+    border-top: 1px solid #1c1b1b;
+    border-bottom: 1px solid #1c1b1b;
+}
+
+/* bordas iguais ao modal */
+.table-precision tbody td:first-child {
+    border-left: 1px solid #1c1b1b;
+    border-radius: 10px 0 0 10px;
+}
+.table-precision tbody td:last-child {
+    border-right: 1px solid #1c1b1b;
+    border-radius: 0 10px 10px 0;
+}
+
+/* =======================
+   INPUTS (IGUAL MODAL)
+======================= */
+
+.input-precision {
+    background-color: #0e0e0e !important;
+    border: 1px solid #2a2a2a !important;
+    color: #e5e2e1 !important;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    padding: 10px 14px !important;
+    transition: 0.2s;
+}
+
+.input-precision:focus {
+    border-color: var(--precision-red) !important;
+    box-shadow: 0 0 10px rgba(192, 0, 20, 0.2);
+    outline: none;
+}
+
+/* =======================
+   MODAL (PADRÃO LIMPO)
+======================= */
+
+.modal-overlay {
+    background-color: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+}
+
+.modal-box {
+    background-color: #0e0e0e;
+    border: 1px solid #1c1b1b;
+}
+
+/* =======================
+   BOTÕES AÇÕES
+======================= */
+
+.icon-btn {
+    background: #0e0e0e;
+    border: 1px solid #1c1b1b;
+    padding: 6px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.icon-btn:hover {
+    border-color: var(--precision-red);
+    box-shadow: 0 0 8px rgba(192,0,20,0.2);
+}
+</style>
+
+<div class="max-w-6xl mx-auto mt-16 px-4">
 
     <!-- HEADER -->
-    <div class="text-center mb-10">
-        <h1 class="text-3xl font-black uppercase tracking-tighter">
-            <span class="text-gradient-pink-red">Ajustar_Simulação</span>
-        </h1>
-        <p class="text-[9px] font-bold tracking-[0.4em] text-white/20 uppercase mt-1">
-            Revisão de Parâmetros Operacionais
-        </p>
+    <div class="flex justify-between items-center mb-12">
+        <div>
+            <h1 class="text-3xl font-black text-gradient-pink-red uppercase">Simulador_Invest</h1>
+            <p class="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase mt-1">
+                Terminal de Projeções Ativo
+            </p>
+        </div>
+
+        <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')"
+                class="bg-gradient-pink-red text-white px-8 py-3 rounded-sm font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition">
+            Nova Simulação +
+        </button>
     </div>
 
-    <!-- FORMULÁRIO -->
-    <div class="card-editar rounded-sm p-10 relative">
-        <a href="{{ url_for('simulador') }}" class="absolute top-4 right-6 text-white/20 hover:text-white transition text-xs font-bold uppercase tracking-widest">
-            ✕
-        </a>
+    <!-- TABELA -->
+    <div class="overflow-x-auto">
+        <table class="table-precision">
+            <thead>
+                <tr>
+                    <th>Ativo</th>
+                    <th>Investido</th>
+                    <th>Taxa</th>
+                    <th>Prazo</th>
+                    <th>Lucro</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
 
-        <form method="POST" class="space-y-5">
-            <div>
-                <label class="label-precision">Tipo de Ativo</label>
-                <select name="tipo" class="w-full input-precision appearance-none" required>
-                    <option value="CDI" {% if investimento.tipo == 'CDI' %}selected{% endif %}>CDI</option>
-                    <option value="LCI" {% if investimento.tipo == 'LCI' %}selected{% endif %}>LCI</option>
-                    <option value="LCA" {% if investimento.tipo == 'LCA' %}selected{% endif %}>LCA</option>
-                    <option value="SELIC" {% if investimento.tipo == 'SELIC' %}selected{% endif %}>TESOURO SELIC</option>
-                    <option value="PREFIXADO" {% if investimento.tipo == 'PREFIXADO' %}selected{% endif %}>PREFIXADO</option>
-                    <option value="IPCA" {% if investimento.tipo == 'IPCA' %}selected{% endif %}>IPCA+</option>
+            <tbody>
+                {% set ns = namespace(total_lucro=0) %}
+
+                {% if investimentos %}
+                {% for inv in investimentos %}
+                <tr class="table-row-precision">
+                    <td class="font-black uppercase">{{ inv.tipo }}</td>
+                    <td class="text-gray-400">R$ {{ "%.2f"|format(inv.valor_investido|float) }}</td>
+                    <td class="text-gray-400">{{ inv.taxa }}%</td>
+                    <td class="text-gray-400">{{ inv.tempo }} meses</td>
+                    <td class="text-green-500 font-black">R$ {{ "%.2f"|format(inv.lucro|float) }}</td>
+
+                    <td>
+                        <a href="{{ url_for('excluir_simulador', id=inv.id) }}"
+                           class="icon-btn text-white/40 hover:text-red-500">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </a>
+                    </td>
+                </tr>
+
+                {% set ns.total_lucro = ns.total_lucro + (inv.lucro|float) %}
+                {% endfor %}
+
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-20 text-white/10 uppercase tracking-widest text-xs">
+                        Aguardando dados de simulação...
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="mt-6 flex justify-end">
+        <div class="modal-box p-6 rounded-sm">
+            <span class="text-[10px] font-bold text-white/30 uppercase mr-4">
+                Total:
+            </span>
+            <span class="text-2xl font-black text-white">
+                R$ {{ "%.2f"|format(ns.total_lucro) }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="modalCadastro" class="hidden fixed inset-0 flex items-center justify-center modal-overlay z-50">
+
+    <div class="modal-box w-[400px] rounded-sm p-10 relative shadow-2xl">
+
+        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
+                class="absolute top-5 right-5 text-white/30 hover:text-white">
+            ✕
+        </button>
+
+        <div class="text-center mb-8">
+            <h3 class="font-black text-gradient-pink-red uppercase">
+                Parâmetros_Simulação
+            </h3>
+            <p class="text-[9px] text-white/20 mt-1 uppercase tracking-widest">
+                Ajuste as variáveis de mercado
+            </p>
+        </div>
+
+        <form id="formSimulador" method="POST" class="space-y-5">
+
+            <select name="tipo" id="tipo" class="w-full input-precision" onchange="atualizarTaxaAuto()" required>
+                <option value="" disabled selected>TIPO DE ATIVO</option>
+                <option value="CDI">CDI</option>
+                <option value="LCI">LCI</option>
+                <option value="LCA">LCA</option>
+                <option value="SELIC">TESOURO SELIC</option>
+                <option value="PREFIXADO">TESOURO PREFIXADO</option>
+                <option value="IPCA">TESOURO IPCA+</option>
+            </select>
+
+            <input type="number" name="valor_investido"
+                   placeholder="VALOR DE APORTE (R$)"
+                   class="w-full input-precision" required>
+
+            <input type="number" id="taxa" name="taxa"
+                   placeholder="TAXA ANUAL"
+                   class="w-full input-precision" required>
+
+            <div class="flex gap-3">
+                <input type="number" id="tempo_val" name="tempo"
+                       placeholder="PRAZO"
+                       class="w-2/3 input-precision" required>
+
+                <select id="unidade" class="w-1/3 input-precision">
+                    <option value="meses">MESES</option>
+                    <option value="anos">ANOS</option>
                 </select>
             </div>
 
-            <div>
-                <label class="label-precision">Valor Investido (R$)</label>
-                <input type="number" step="0.01" name="valor_investido" class="w-full input-precision"
-                       value="{{ investimento.valor_investido }}" required>
-            </div>
+            <button type="submit"
+                    class="w-full bg-gradient-pink-red text-white font-black py-4 uppercase text-[10px] tracking-widest">
+                Processar_Simulação
+            </button>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="label-precision">Taxa (%)</label>
-                    <input type="number" step="0.01" name="taxa" class="w-full input-precision"
-                           value="{{ investimento.taxa }}" required>
-                </div>
-                <div>
-                    <label class="label-precision">Prazo (Meses)</label>
-                    <input type="number" name="tempo" class="w-full input-precision"
-                           value="{{ investimento.tempo }}" required>
-                </div>
-            </div>
-
-            <div class="pt-4">
-                <button type="submit" class="bg-gradient-pink-red w-full py-4 rounded-sm text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-lg hover:brightness-110 transition">
-                    Atualizar_Simulação
-                </button>
-            </div>
-
-            <a href="{{ url_for('simulador') }}" class="block text-center text-white/20 hover:text-white transition text-[9px] font-bold uppercase tracking-[0.2em] mt-4">
-                Cancelar e Voltar
-            </a>
         </form>
     </div>
 </div>
+
+<script>
+const taxasMercado = {
+    "CDI": 11.15,
+    "LCI": 9.85,
+    "LCA": 9.85,
+    "SELIC": 11.25,
+    "PREFIXADO": 12.50,
+    "IPCA": 6.25
+};
+
+function atualizarTaxaAuto() {
+    const tipo = document.getElementById('tipo').value;
+    const inputTaxa = document.getElementById('taxa');
+    if (taxasMercado[tipo]) {
+        inputTaxa.value = taxasMercado[tipo];
+    }
+}
+
+document.getElementById('formSimulador').onsubmit = function() {
+    const tempoInput = document.getElementById('tempo_val');
+    const unidade = document.getElementById('unidade').value;
+    if (unidade === 'anos') {
+        tempoInput.value = parseInt(tempoInput.value) * 12;
+    }
+};
+
+window.onclick = function(event) {
+    const modal = document.getElementById('modalCadastro');
+    if (event.target === modal) modal.classList.add('hidden');
+}
+</script>
+
 {% endblock %}

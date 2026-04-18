@@ -13,8 +13,8 @@ tailwind.config = {
     theme: {
         extend: {
             colors: {
-                primary: "#c00014", // Vermelho
-                "primary-fixed-dim": "#f9a8b1", // Rosa
+                primary: "#c00014",
+                "primary-fixed-dim": "#f9a8b1",
                 "surface": "#000000",
                 "surface-container-low": "#0e0e0e",
                 "on-surface": "#e5e2e1",
@@ -29,36 +29,32 @@ tailwind.config = {
 </script>
 
 <style>
-/* Fundo radial dark */
 body {
     background-color: #000000 !important;
     background-image: radial-gradient(#111 1px, transparent 1px) !important;
     background-size: 40px 40px !important;
 }
 
-/* Estilo do Card contornado de Vermelho */
 .login-card {
     background-color: rgba(8, 8, 8, 0.9);
     border: 2px solid #c00014;
     box-shadow: 0 0 20px rgba(192, 0, 20, 0.2);
 }
 
-/* Campos Rosa que mudam para Vermelho no clique */
 .input-precision {
     background-color: #0e0e0e !important;
-    border: 1px solid #f9a8b1 !important; /* Borda Rosa */
-    color: #f9a8b1 !important; /* Texto Rosa */
+    border: 1px solid #f9a8b1 !important;
+    color: #f9a8b1 !important;
     transition: all 0.3s ease;
 }
 
 .input-precision:focus {
-    border-color: #c00014 !important; /* Borda muda para Vermelho */
-    color: #ffffff !important; /* Texto muda para Branco */
+    border-color: #c00014 !important;
+    color: #ffffff !important;
     box-shadow: 0 0 12px rgba(192, 0, 20, 0.4);
     outline: none;
 }
 
-/* Placeholder Rosa */
 .input-precision::placeholder {
     color: rgba(249, 168, 177, 0.4);
 }
@@ -78,10 +74,8 @@ body {
 
 <main class="min-h-screen flex justify-center items-center px-6">
 
-<!-- CARD COM CONTORNO VERMELHO -->
 <section class="w-full max-w-sm login-card p-8 rounded-2xl space-y-10">
 
-    <!-- BLOCO DE MENSAGENS FLASH (ADICIONADO) -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="space-y-2">
@@ -102,10 +96,9 @@ body {
         </h1>
     </div>
 
-    <!-- 🔥 FORM FLASK -->
-    <form method="POST" class="space-y-6">
+    <!-- FORM CORRIGIDO -->
+    <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
 
-        <!-- EMAIL -->
         <div>
             <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Email</label>
             <input
@@ -117,7 +110,6 @@ body {
             >
         </div>
 
-        <!-- SENHA -->
         <div>
             <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Senha</label>
             <input
@@ -129,17 +121,18 @@ body {
             >
         </div>
 
-        <!-- BOTÃO -->
         <button type="submit" class="w-full h-14 bg-gradient-to-br from-primary-fixed-dim to-primary text-white font-black uppercase tracking-widest rounded-lg neon-glow hover:brightness-110 transition-all active:scale-95">
             Entrar
         </button>
 
     </form>
 
-    <!-- CADASTRO -->
+    <!-- LINK CORRIGIDO -->
     <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
         Não tem conta?
-        <a href="/cadastro" class="text-primary-fixed-dim hover:text-primary transition-colors">Cadastrar</a>
+        <a href="{{ url_for('auth.cadastro') }}" class="text-primary-fixed-dim hover:text-primary transition-colors">
+            Cadastrar
+        </a>
     </p>
 
 </section>

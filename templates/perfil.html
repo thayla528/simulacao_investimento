@@ -1,8 +1,6 @@
-
 {% extends 'base.html' %}
 
 {% block conteudo %}
-<!-- Chart.js correto -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -46,7 +44,6 @@ body {
 
 .bg-precision { background-color: var(--precision-red); }
 
-/* Animação para indicador online */
 .pulse-green {
     width: 8px;
     height: 8px;
@@ -78,25 +75,44 @@ body {
         <!-- PERFIL -->
         <div class="flex items-center gap-6 p-4 glass-card rounded-xl">
             <div class="relative group">
+
                 {% if os.path.exists('static/perfil/' + usuario + '.png') %}
                     <img src="{{ url_for('static', filename='perfil/' + usuario + '.png') }}"
-                         class="w-20 h-20 rounded-lg object-cover border-2" style="border-color: var(--pink-text)">
+                         class="w-20 h-20 rounded-lg object-cover border-2"
+                         style="border-color: var(--pink-text)">
                 {% else %}
                     <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/10">
                         <span class="material-symbols-outlined text-3xl text-white/20">person</span>
                     </div>
                 {% endif %}
 
-                <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload_foto') }}" class="absolute -bottom-2 -right-2">
-                    <label for="foto-input" class="cursor-pointer bg-precision text-white p-1 rounded-md flex hover:scale-110 transition">
+                <form method="POST"
+                      enctype="multipart/form-data"
+                      action="{{ url_for('perfil.upload_foto') }}"
+                      class="absolute -bottom-2 -right-2">
+
+                    <label for="foto-input"
+                           class="cursor-pointer bg-precision text-white p-1 rounded-md flex hover:scale-110 transition">
+
                         <span class="material-symbols-outlined text-sm">photo_camera</span>
-                        <input type="file" id="foto-input" name="foto" class="hidden" onchange="this.form.submit()">
+
+                        <input type="file"
+                               id="foto-input"
+                               name="foto"
+                               class="hidden"
+                               onchange="this.form.submit()">
                     </label>
                 </form>
             </div>
+
             <div>
-                <div class="text-[10px] font-bold tracking-widest uppercase mb-1" style="color: var(--pink-text)">Operador Ativo</div>
-                <div class="text-xl font-headline font-bold uppercase tracking-tight">{{ usuario }}</div>
+                <div class="text-[10px] font-bold tracking-widest uppercase mb-1"
+                     style="color: var(--pink-text)">
+                    Operador Ativo
+                </div>
+                <div class="text-xl font-headline font-bold uppercase tracking-tight">
+                    {{ usuario }}
+                </div>
             </div>
         </div>
     </div>
@@ -106,13 +122,15 @@ body {
 
         <div class="lg:col-span-2 glass-card h-[350px] flex flex-col p-6">
             <div class="flex justify-between items-center mb-6">
-                <!-- Corrigido o tamanho da fonte para não quebrar -->
-                <span class="text-[10px] font-bold uppercase tracking-widest text-white/40">Performance Consolidada de Lucro</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                    Performance Consolidada de Lucro
+                </span>
                 <div class="flex items-center gap-4">
                     <div class="pulse-green"></div>
                     <span class="text-[9px] font-bold text-green-600 uppercase">Live Data</span>
                 </div>
             </div>
+
             <div class="flex-1 w-full relative">
                 <canvas id="lucroChart"></canvas>
             </div>
@@ -120,34 +138,45 @@ body {
 
         <!-- INDICADORES -->
         <div class="flex flex-col gap-4">
+
             <div class="glass-card flex-1 flex flex-col justify-center border-l-4 border-precision">
                 <h3 class="text-4xl font-black text-white">{{ empresas|length }}</h3>
-                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Empresas Monitoradas</p>
+                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">
+                    Empresas Monitoradas
+                </p>
             </div>
 
-            <div class="glass-card flex-1 flex flex-col justify-center border-l-4" style="border-left-color: var(--pink-text)">
+            <div class="glass-card flex-1 flex flex-col justify-center border-l-4"
+                 style="border-left-color: var(--pink-text)">
+
                 {% set ns = namespace(total_p_l=0) %}
                 {% for empresa in empresas %}
                     {% set ns.total_p_l = ns.total_p_l + (empresa.variacao_valor|float(default=0)) %}
                 {% endfor %}
+
                 <h3 class="text-4xl font-black {% if ns.total_p_l >= 0 %}text-green-500{% else %}text-red-600{% endif %}">
                     R$ {{ "%.2f"|format(ns.total_p_l) }}
                 </h3>
-                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">Lucro em Tempo Real</p>
-                <div class="w-full bg-white/5 h-1 mt-4 rounded-full overflow-hidden">
-                    <div class="bg-precision h-full w-2/3"></div>
-                </div>
+
+                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">
+                    Lucro em Tempo Real
+                </p>
             </div>
         </div>
     </div>
 
     <!-- TABELA -->
     <div class="glass-card overflow-hidden !p-0">
+
         <div class="p-6 border-b border-white/5">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-white/60">Terminais de Ativos</h3>
+            <h3 class="text-xs font-bold uppercase tracking-widest text-white/60">
+                Terminais de Ativos
+            </h3>
         </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left">
+
                 <thead class="bg-black text-[10px] uppercase tracking-widest text-white/40">
                     <tr>
                         <th class="px-8 py-4">Ticker</th>
@@ -157,32 +186,41 @@ body {
                         <th class="px-8 py-4 text-center">Ações</th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-white/5">
                     {% for empresa in empresas %}
                     <tr class="hover:bg-white/5 transition-all group">
-                        <td class="px-8 py-4 font-black text-neon-red">{{ empresa.ticker }}</td>
-                        <td class="px-8 py-4 text-xs font-bold uppercase text-white/70">{{ empresa.empresa }}</td>
-                        <td class="px-8 py-4 text-xs text-white">
-                             R$ {{ "%.2f"|format(empresa.preco_atual_b3 or empresa.preco_acao) }}
+
+                        <td class="px-8 py-4 font-black text-neon-red">
+                            {{ empresa.ticker }}
                         </td>
+
+                        <td class="px-8 py-4 text-xs font-bold uppercase text-white/70">
+                            {{ empresa.empresa }}
+                        </td>
+
+                        <td class="px-8 py-4 text-xs text-white">
+                            R$ {{ "%.2f"|format(empresa.preco_atual_b3 or empresa.preco_acao) }}
+                        </td>
+
                         <td class="px-8 py-4 text-right font-black {% if (empresa.variacao_valor|float) >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
                             R$ {{ "%.2f"|format(empresa.variacao_valor or 0) }}
-
-                            <!-- ADICIONADO: Ícones de tendência -->
-                            {% if (empresa.variacao_valor|float) > 0 %}
-                                <span class="material-symbols-outlined text-[14px] align-middle ml-1">trending_up</span>
-                            {% elif (empresa.variacao_valor|float) < 0 %}
-                                <span class="material-symbols-outlined text-[14px] align-middle ml-1">trending_down</span>
-                            {% endif %}
                         </td>
+
                         <td class="px-8 py-4 text-center">
+
                             <div class="flex justify-center gap-4">
-                                <a href="{{ url_for('editar_empresa', id=empresa.id) }}" class="text-white/20 hover:text-white transition">
+
+                                <a href="{{ url_for('empresas.editar_empresa', id=empresa.id) }}"
+                                   class="text-white/20 hover:text-white transition">
                                     <span class="material-symbols-outlined text-lg">edit</span>
                                 </a>
-                                <a href="{{ url_for('excluir_empresa', id=empresa.id) }}" class="text-white/20 hover:text-red-600 transition">
+
+                                <a href="{{ url_for('empresas.excluir_empresa', id=empresa.id) }}"
+                                   class="text-white/20 hover:text-red-600 transition">
                                     <span class="material-symbols-outlined text-lg">delete</span>
                                 </a>
+
                             </div>
                         </td>
                     </tr>
@@ -192,66 +230,51 @@ body {
             </table>
         </div>
     </div>
-
 </div>
 
-<!-- 1. Certifique-se de que esta linha está no topo do arquivo (ou antes do script) -->
-<script src="https://jsdelivr.net"></script>
-
-<!-- Garanta que este script esteja no topo do bloco ou antes do código abaixo -->
 <script src="https://jsdelivr.net"></script>
 
 <script>
-    // Usamos um bloco try/catch para o erro não "apagar" a tela
-    try {
-        const ctx = document.getElementById('lucroChart').getContext('2d');
+try {
+    const ctx = document.getElementById('lucroChart').getContext('2d');
 
-        // Criando o efeito de degradê
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(249, 168, 177, 0.4)'); // Rosa visível
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');         // Termina no preto
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(249, 168, 177, 0.4)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [{% for e in empresas %}"{{ e.ticker }}"{% if not loop.last %}, {% endif %}{% endfor %}],
-                datasets: [{
-                    data: [{% for e in empresas %}{{ e.variacao_valor or 0 }}{% if not loop.last %}, {% endif %}{% endfor %}],
-                    borderColor: '#f9a8b1',
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 2,
-                    pointBackgroundColor: '#c00014',
-                    pointRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' }, // Linhas cinzas sutis
-                        ticks: { color: '#666' }
-                    },
-                    x: {
-                        display: false // Remove os nomes conforme solicitado
-                    }
-                }
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [{% for e in empresas %}"{{ e.ticker }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for e in empresas %}{{ e.variacao_valor or 0 }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                borderColor: '#f9a8b1',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointBackgroundColor: '#c00014',
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#666' }
+                },
+                x: { display: false }
             }
-        });
-    } catch (e) {
-        console.error("Erro ao carregar o gráfico:", e);
-    }
+        }
+    });
+
+} catch (e) {
+    console.error("Erro ao carregar gráfico:", e);
+}
 </script>
-
-
-
-
-
-
-
 
 {% endblock %}
