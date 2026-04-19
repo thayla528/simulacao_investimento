@@ -10,6 +10,9 @@ from routes.empresas import empresas_bp
 from services.yfinance_service import yfinance_bp
 from routes.simulador import simulador_bp
 from routes.perfil import perfil_bp
+from database.banco import criar_tabela
+
+criar_tabela()
 
 app = Flask(__name__)
 
@@ -22,6 +25,11 @@ app.register_blueprint(yfinance_bp)
 app.register_blueprint(simulador_bp)
 app.register_blueprint(perfil_bp)
 
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=False,  # True quando usar HTTPS
+    SESSION_COOKIE_SAMESITE="Lax"
+)
 
 # ------------------ TESOURO DIRETO ------------------
 @app.route("/taxas_tesouro")

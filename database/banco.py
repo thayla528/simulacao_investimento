@@ -22,7 +22,7 @@ def criar_tabela():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS empresas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT,
+            usuario_id INTEGER NOT NULL,
             ticker TEXT NOT NULL,
             empresa TEXT NOT NULL,
             setor TEXT NOT NULL,
@@ -40,7 +40,7 @@ def criar_tabela():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS investimentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT,
+            usuario_id INTEGER NOT NULL,
             tipo TEXT,
             valor_investido REAL,
             taxa REAL,

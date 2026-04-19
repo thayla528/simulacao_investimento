@@ -173,7 +173,7 @@ body {
                     <td class="text-green-500 font-black">R$ {{ "%.2f"|format(inv.lucro|float) }}</td>
 
                     <td>
-                        <a href="{{ url_for('excluir_simulador', id=inv.id) }}"
+                        <a href="{{ url_for('simulador.excluir_simulador', id=inv.id) }}"
                            class="icon-btn text-white/40 hover:text-red-500">
                             <span class="material-symbols-outlined text-lg">delete</span>
                         </a>

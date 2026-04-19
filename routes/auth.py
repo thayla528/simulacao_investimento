@@ -1,10 +1,16 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from database.banco import conectar
-from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
 
 auth_bp = Blueprint("auth", __name__)
 
+# 🔐 HASH FAKE (proteção contra enumeração de usuário)
+FAKE_HASH = generate_password_hash("senha_fake")
+
+
+# 🔒 DECORATOR DE PROTEÇÃO
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -14,22 +20,39 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
+# ---------------- LOGIN ----------------
 @auth_bp.route("/", methods=["GET", "POST"])
 def login():
+
+    # 🔁 Evita login duplicado
+    if "usuario_id" in session:
+        return redirect(url_for("perfil.perfil"))
+
     if request.method == "POST":
         email = request.form.get("form-email")
         senha_digitada = request.form.get("form-senha")
 
-        conn = conectar()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE email=?", (email,))
-        usuario = cursor.fetchone()
-        conn.close()
+        # 🔍 Validação básica
+        if not email or not senha_digitada:
+            flash("Preencha todos os campos.", "warning")
+            return redirect(url_for("auth.login"))
 
-        if usuario and check_password_hash(usuario['senha'], senha_digitada):
-            # AGORA SALVA ID + NOME
-            session["usuario_id"] = usuario['id']
-            session["usuario"] = usuario['nome']
+        email = email.lower().strip()
+
+        # 🔐 Conexão segura
+        with conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM usuarios WHERE email=?", (email,))
+            usuario = cursor.fetchone()
+
+        # 🔒 Proteção contra enumeração
+        hash_senha = usuario["senha"] if usuario else FAKE_HASH
+
+        if check_password_hash(hash_senha, senha_digitada) and usuario:
+            # ✅ PADRÃO CORRETO (usuario_id)
+            session["usuario_id"] = usuario["id"]
+            session["usuario_nome"] = usuario["nome"]
 
             return redirect(url_for("perfil.perfil"))
 
@@ -37,32 +60,52 @@ def login():
 
     return render_template("login.html")
 
+
+# ---------------- CADASTRO ----------------
 @auth_bp.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
+
     if request.method == "POST":
         nome = request.form.get("nome")
         email = request.form.get("email")
         senha_plana = request.form.get("senha")
 
+        # 🔍 Validação
+        if not nome or not email or not senha_plana:
+            flash("Preencha todos os campos.", "warning")
+            return redirect(url_for("auth.cadastro"))
+
+        if len(senha_plana) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres.", "warning")
+            return redirect(url_for("auth.cadastro"))
+
+        email = email.lower().strip()
+
+        # 🔐 Hash da senha
         senha_com_hash = generate_password_hash(senha_plana)
 
-        conn = conectar()
-        cursor = conn.cursor()
         try:
-            cursor.execute(
-                "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
-                (nome, email, senha_com_hash)
-            )
-            conn.commit()
+            with conectar() as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
+                    (nome, email, senha_com_hash)
+                )
+                conn.commit()
+
             flash("Cadastro realizado com sucesso!", "success")
             return redirect(url_for("auth.login"))
-        except Exception as e:
-            flash(f"Erro ao cadastrar: {e}", "danger")
-        finally:
-            conn.close()
+
+        except sqlite3.IntegrityError:
+            flash("Este e-mail já está cadastrado.", "warning")
+
+        except Exception:
+            flash("Erro interno. Tente novamente.", "danger")
 
     return render_template("cadastro.html")
 
+
+# ---------------- LOGOUT ----------------
 @auth_bp.route("/logout")
 def logout():
     session.clear()

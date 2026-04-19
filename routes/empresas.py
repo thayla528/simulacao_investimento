@@ -3,20 +3,22 @@ from database.banco import conectar
 from routes.auth import login_required
 import yfinance as yf
 
-
-
 empresas_bp = Blueprint("empresas", __name__)
+
 
 # ------------------ CADASTRO DE AÇÕES ------------------
 @empresas_bp.route("/cadastro_de_acao")
 @login_required
 def cadastro_de_acao():
-    if "usuario" not in session:
-        return redirect(url_for("auth.login"))
 
     conn = conectar()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM empresas WHERE usuario = ?", (session["usuario"],))
+
+    cursor.execute(
+        "SELECT * FROM empresas WHERE usuario_id = ?",
+        (session["usuario_id"],)
+    )
+
     empresas = cursor.fetchall()
     conn.close()
 
@@ -27,17 +29,14 @@ def cadastro_de_acao():
 @empresas_bp.route("/excluir_empresa/<int:id>")
 @login_required
 def excluir_empresa(id):
-    if "usuario" not in session:
-        return redirect(url_for("auth.login"))
 
     try:
         conn = conectar()
         cursor = conn.cursor()
 
-        # só apaga se for do usuário logado
         cursor.execute(
-            "DELETE FROM empresas WHERE id = ? AND usuario = ?",
-            (id, session["usuario"])
+            "DELETE FROM empresas WHERE id = ? AND usuario_id = ?",
+            (id, session["usuario_id"])
         )
 
         conn.commit()
@@ -56,13 +55,12 @@ def excluir_empresa(id):
 @empresas_bp.route("/editar_empresa/<int:id>", methods=["GET", "POST"])
 @login_required
 def editar_empresa(id):
-    if "usuario" not in session:
-        return redirect(url_for("auth.login"))
 
     conn = conectar()
     cursor = conn.cursor()
 
     if request.method == "POST":
+
         def parse_float(val):
             if val is None or val == "":
                 return 0.0
@@ -84,20 +82,31 @@ def editar_empresa(id):
             UPDATE empresas
             SET ticker=?, empresa=?, setor=?, num_acoes=?, preco_acao=?,
                 lucro_liquido=?, patrimonio=?, ativos=?, divida=?, lote=?, tipo_acao=?
-            WHERE id=?
+            WHERE id=? AND usuario_id=?
         """, (
             ticker, empresa_nome, setor, num_acoes, preco_acao,
-            lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao, id
+            lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao,
+            id, session["usuario_id"]
         ))
 
         conn.commit()
         conn.close()
+
         flash("Empresa atualizada com sucesso!", "success")
         return redirect(url_for("perfil.perfil"))
 
-    cursor.execute("SELECT * FROM empresas WHERE id = ?", (id,))
+    # 🔒 só busca se for do usuário
+    cursor.execute(
+        "SELECT * FROM empresas WHERE id = ? AND usuario_id = ?",
+        (id, session["usuario_id"])
+    )
+
     empresa = cursor.fetchone()
     conn.close()
+
+    if not empresa:
+        flash("Empresa não encontrada!", "danger")
+        return redirect(url_for("perfil.perfil"))
 
     return render_template("editar_acao.html", empresa=empresa)
 
@@ -106,9 +115,6 @@ def editar_empresa(id):
 @empresas_bp.route("/cadastrar_empresa", methods=["POST"])
 @login_required
 def cadastrar_empresa():
-    if "usuario" not in session:
-        flash("Você precisa estar logado!", "warning")
-        return redirect(url_for("auth.login"))
 
     try:
         def parse_float(val):
@@ -134,16 +140,18 @@ def cadastrar_empresa():
 
         conn = conectar()
         cursor = conn.cursor()
+
         cursor.execute("""
             INSERT INTO empresas (
-                usuario, ticker, empresa, setor, num_acoes, preco_acao,
+                usuario_id, ticker, empresa, setor, num_acoes, preco_acao,
                 lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            session["usuario"],
+            session["usuario_id"],
             ticker, empresa_nome, setor, num_acoes, preco_acao,
             lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao
         ))
+
         conn.commit()
         conn.close()
 
@@ -151,7 +159,7 @@ def cadastrar_empresa():
 
     except Exception as e:
         print("ERRO AO CADASTRAR EMPRESA:", e)
-        flash(f"Erro ao cadastrar empresa: {e}", "danger")
+        flash("Erro ao cadastrar empresa!", "danger")
 
     return redirect(url_for("perfil.perfil"))
 
@@ -160,17 +168,17 @@ def cadastrar_empresa():
 @empresas_bp.route("/buscar_acao/<ticker>")
 @login_required
 def buscar_acao(ticker):
+
     try:
         ticker = ticker.strip().upper()
 
-        dados = yf.Ticker(f"{ticker}.SA")  # B3 Brasil
-
+        dados = yf.Ticker(f"{ticker}.SA")
         info = dados.info
 
         if not info or "shortName" not in info:
-            return {"erro": "Ativo não encontrado"}
+            return jsonify({"erro": "Ativo não encontrado"})
 
-        return {
+        return jsonify({
             "nome": info.get("shortName"),
             "setor": info.get("sector"),
             "preco": info.get("regularMarketPrice"),
@@ -178,8 +186,8 @@ def buscar_acao(ticker):
             "patrimonio": info.get("bookValue"),
             "ativos": info.get("totalAssets"),
             "divida": info.get("totalDebt")
-        }
+        })
 
     except Exception as e:
         print("ERRO BUSCAR AÇÃO:", e)
-        return {"erro": "Falha ao buscar dados"}
+        return jsonify({"erro": "Falha ao buscar dados"})
