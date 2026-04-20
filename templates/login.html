@@ -98,6 +98,7 @@ body {
 
     <!-- FORM CORRIGIDO -->
     <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div>
             <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Email</label>

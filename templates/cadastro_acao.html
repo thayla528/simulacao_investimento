@@ -217,6 +217,7 @@ body {
 
         <!-- FORM NÃO FOI MEXIDO -->
         <form action="{{ url_for('empresas.cadastrar_empresa') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <!-- SÓ O LAYOUT FOI ALTERADO (SAFE) -->
             <div class="grid grid-cols-2 gap-10">

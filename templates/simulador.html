@@ -203,6 +203,8 @@ body {
 
         <form method="POST" class="space-y-5">
 
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <!-- SELECT DE PRODUTO -->
             <select name="tipo" class="w-full input-precision" required>
                 <option value="">Selecione o produto</option>

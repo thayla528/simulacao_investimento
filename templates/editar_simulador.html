@@ -55,7 +55,11 @@ body {
     <!-- CARD -->
     <div class="bg-[#0c0c0c] border border-[#1c1b1b] rounded-xl p-10 shadow-xl">
 
-        <form method="POST" class="space-y-6">
+        <form method="POST"
+              action="{{ url_for('simulador.editar_simulador', id=investimento.id) }}"
+              class="space-y-6">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <div>
                 <label class="text-[10px] text-white/40 uppercase">Tipo</label>
@@ -73,8 +77,17 @@ body {
             </div>
 
             <div>
-                <label class="text-[10px] text-white/40 uppercase">Tempo (meses)</label>
-                <input type="number" name="tempo" value="{{ investimento.tempo }}" class="w-full input-precision" required>
+                <input type="number" name="tempo"
+                   placeholder="TEMPO"
+                   class="w-full input-precision" required>
+            </div>
+
+           <div>
+                <label>Tipo de Tempo</label>
+                <select name="tipo_tempo" class="w-full input-precision">
+                    <option value="meses">Meses</option>
+                    <option value="anos">Anos</option>
+                </select>
             </div>
 
             <!-- BOTÕES -->

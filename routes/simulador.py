@@ -4,6 +4,8 @@ from routes.auth import login_required
 from services.calculos import calcular_lucro
 import yfinance as yf
 
+from services.investimentos import calcular_resultado
+
 simulador_bp = Blueprint("simulador", __name__)
 
 
@@ -33,26 +35,7 @@ def buscar_ativo(ticker):
 
 # ------------------ TAXA AUTOMÁTICA ------------------
 
-def taxa_automatica(tipo):
-    try:
-        ativo = yf.Ticker(tipo)
-        hist = ativo.history(period="1y")
 
-        if hist.empty:
-            return 0.10  # CDI padrão
-
-        inicio = hist["Close"].iloc[0]
-        fim = hist["Close"].iloc[-1]
-
-        retorno = (fim - inicio) / inicio
-
-        # trava de segurança
-        retorno = max(min(retorno, 1), -0.5)
-
-        return retorno
-
-    except:
-        return 0.10
 
 # ------------------ EDITAR ------------------
 @simulador_bp.route("/editar_simulador/<int:id>", methods=["GET", "POST"])
@@ -76,15 +59,16 @@ def editar_simulador(id):
         valor = float(request.form.get('valor_investido', 0))
 
         # 🔥 AGORA AUTOMÁTICO
-        taxa = taxa_automatica(tipo)
 
         tempo = int(request.form.get('tempo', 0))
-        tipo_tempo = request.form.get('tipo_tempo')  # "meses" ou "anos"
+
+        # 🔥 ADICIONA ISSO
+        tipo_tempo = request.form.get('tipo_tempo', 'meses')
 
         if tipo_tempo == "anos":
             tempo = tempo * 12
 
-        lucro = calcular_lucro(valor, taxa * 100, tempo)
+        taxa, lucro = calcular_resultado(valor, tipo, tempo)
 
         cursor.execute("""
             UPDATE investimentos
@@ -129,6 +113,11 @@ def excluir_simulador(id):
 
     return redirect(url_for("simulador.investimentos"))
 
+def safe_float(val):
+    try:
+        return float(val)
+    except:
+        return 0.0
 
 # ------------------ SIMULADOR ------------------
 @simulador_bp.route("/simulador", methods=["GET", "POST"])
@@ -143,9 +132,9 @@ def investimentos():
         tempo = int(request.form.get('tempo', 0))
 
         # 🔥 TAXA AUTOMÁTICA DO MERCADO
-        taxa = taxa_automatica(tipo)
+        taxa, lucro = calcular_resultado(valor, tipo, tempo)
 
-        lucro = calcular_lucro(valor, taxa * 100, tempo)
+
 
         cursor.execute("""
             INSERT INTO investimentos (

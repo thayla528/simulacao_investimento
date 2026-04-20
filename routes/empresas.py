@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from database.banco import conectar
 from routes.auth import login_required
 import yfinance as yf
+from services.utils import parse_float
 
 empresas_bp = Blueprint("empresas", __name__)
 
@@ -61,11 +62,6 @@ def editar_empresa(id):
 
     if request.method == "POST":
 
-        def parse_float(val):
-            if val is None or val == "":
-                return 0.0
-            return float(str(val).replace(",", "."))
-
         ticker = (request.form.get("ticker") or "").strip().upper()
         empresa_nome = (request.form.get("empresa") or "").strip()
         setor = (request.form.get("setor") or "").strip()
@@ -117,11 +113,6 @@ def editar_empresa(id):
 def cadastrar_empresa():
 
     try:
-        def parse_float(val):
-            if val is None or val == "":
-                return 0.0
-            return float(str(val).replace(",", "."))
-
         ticker = (request.form.get("ticker") or "").strip().upper()
         empresa_nome = (request.form.get("empresa") or "").strip()
         setor = (request.form.get("setor") or "").strip()

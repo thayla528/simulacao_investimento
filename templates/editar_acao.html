@@ -53,6 +53,7 @@
             </h3>
 
             <form action="{{ url_for('empresas.editar_empresa', id=empresa.id) }}" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <!-- TICKER -->
                 <div>
@@ -109,8 +110,8 @@
                 <div>
                     <label class="text-xs uppercase text-gray-400">Quantidade de Ações</label>
                     <input type="number"
-                           name="quantidade_acoes"
-                           value="{{ empresa.quantidade_acoes }}"
+                           name="num_acoes"
+                           value="{{ empresa.num_acoes }}"
                            class="w-full bg-[#1d2026] border-b border-gray-600 px-4 py-3 focus:border-[#c00014] outline-none"
                            required>
                 </div>

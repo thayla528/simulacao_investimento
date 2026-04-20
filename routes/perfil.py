@@ -89,8 +89,5 @@ def upload_foto():
     pasta = os.path.join("static", "perfil")
     caminho = os.path.join(pasta, filename)
 
-    os.makedirs(pasta, exist_ok=True)
-    foto.save(caminho)
-
     flash("Foto atualizada com sucesso!", "success")
     return redirect(url_for("perfil.perfil"))
