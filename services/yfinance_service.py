@@ -5,6 +5,18 @@ import yfinance as yf
 
 yfinance_bp= Blueprint("yfinance", __name__)
 
+import yfinance as yf
+
+def obter_historico(ticker):
+    acao = yf.Ticker(ticker + ".SA")
+
+    hist = acao.history(period="1d", interval="5m")
+
+    return {
+        "labels": hist.index.strftime("%H:%M").tolist(),
+        "valores": hist["Close"].tolist()
+    }
+
 def obter_preco_atual(ticker):
     try:
         # Formata o ticker para o padrão Yahoo Finance (Ex: PETR4 -> PETR4.SA)

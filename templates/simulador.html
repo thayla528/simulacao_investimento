@@ -106,7 +106,7 @@ body {
 
         <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')"
                 class="bg-gradient-pink-red text-white px-8 py-3 rounded-sm font-black text-[10px] uppercase tracking-widest shadow-lg hover:scale-105 transition">
-            Nova Simulação +
+            Nova Simulação
         </button>
     </div>
 
@@ -119,6 +119,7 @@ body {
                     <th>Investido</th>
                     <th>Taxa (a.a)</th>
                     <th>Prazo</th>
+                    <th>% Escolhida</th>
                     <th>Lucro Estimado</th>
                     <th>Ações</th>
                 </tr>
@@ -144,6 +145,10 @@ body {
 
                         <td class="text-gray-400">
                             {{ inv.tempo }} meses
+                        </td>
+
+                        <td class="text-pink-400 font-bold">
+                            {{ inv.percentual }}%
                         </td>
 
                         <td class="text-green-500 font-black">
@@ -173,10 +178,13 @@ body {
             </tbody>
         </table>
     </div>
+    <div class="mt-10 w-[800px] h-[250px] mx-auto">
+        <canvas id="graficoInvestimentos"></canvas>
+    </div>
 
     <!-- TOTAL -->
-    <div class="mt-6 flex justify-end">
-        <div class="bg-[#0c0c0c] border border-[#1c1b1b] p-6 rounded-xl">
+    <div class="mt-6 p-12 flex justify-end">
+        <div class="bg-[#0c0c0c] border border-[#1c1b1b] p-6 rounded-xl mr-8">
             <span class="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mr-4">
                 Total Acumulado:
             </span>
@@ -190,16 +198,21 @@ body {
 <!-- MODAL -->
 <div id="modalCadastro" class="hidden fixed inset-0 flex items-center justify-center modal-overlay z-50">
 
-    <div class="bg-[#0e0e0e] w-[400px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-10">
+    <div class="bg-[#0e0e0e] w-[500px] rounded-sm border border-[#2a2a2a] relative shadow-2xl p-6">
 
         <button onclick="document.getElementById('modalCadastro').classList.add('hidden')"
-                class="absolute top-6 right-6 text-white/20 hover:text-white transition text-2xl">✕</button>
-
+                class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center
+                       rounded-full bg-white/10 hover:bg-white/20
+                       text-white transition shadow-lg">
+            ✕
+        </button>
         <div class="text-center mb-8">
             <h3 class="font-black text-gradient-pink-red text-xl uppercase tracking-tighter">
                 Simulação_Renda_Fixa
             </h3>
         </div>
+
+        <input type="hidden" name="taxa_final" id="inputTaxaFinal">
 
         <form method="POST" class="space-y-5">
 
@@ -219,6 +232,24 @@ body {
                    placeholder="VALOR INVESTIDO"
                    class="w-full input-precision" required>
 
+            <!-- TAXA BASE -->
+
+            <!-- % DA TAXA -->
+            <label class="text-[10px] text-white/40 uppercase tracking-widest">
+                % da taxa desejada
+            </label>
+
+            <input type="range"
+                   name="percentual_taxa"
+                   min="0"
+                   max="150"
+                   value="100"
+                   class="w-full"
+                   oninput="atualizarPercentual(this.value)">
+            <div class="text-center text-sm text-pink-300 font-bold">
+                <span id="valorPercentual">100%</span>
+            </div>
+
             <input type="number" name="tempo"
                    placeholder="TEMPO"
                    class="w-full input-precision" required>
@@ -228,6 +259,8 @@ body {
                 <option value="anos">Anos</option>
             </select>
 
+
+
             <button type="submit"
                     class="w-full bg-gradient-pink-red text-white font-black py-4 uppercase text-[10px]">
                 Processar_Simulação
@@ -235,5 +268,81 @@ body {
         </form>
     </div>
 </div>
+
+<script>
+function atualizarPercentual(valor) {
+    document.getElementById('valorPercentual').innerText = valor + '%';
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const dados = {{ investimentos | tojson }};
+
+// separa por tipo
+let tipos = {};
+dados.forEach(inv => {
+    if (!tipos[inv.tipo]) {
+        tipos[inv.tipo] = 0;
+    }
+    tipos[inv.tipo] += inv.valor_investido;
+});
+
+// labels e valores
+const labels = Object.keys(tipos);
+const valores = Object.values(tipos);
+
+// gráfico
+new Chart(document.getElementById('graficoInvestimentos'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Total Investido (R$)',
+            data: valores,
+            backgroundColor: [
+                '#f9a8b1', // rosa
+                '#ff4d6d', // rosa mais forte
+                '#ff758f',
+                '#c00014'  // vermelho
+            ],
+            borderColor: '#c00014',
+            borderWidth: 2,
+            borderRadius: 6
+
+
+
+
+
+
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#f9a8b1'
+                },
+                grid: {
+                    color: '#1c1b1b'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#f9a8b1'
+                },
+                grid: {
+                    color: '#1c1b1b'
+                }
+            }
+        }
+    }
+});
+</script>
 
 {% endblock %}

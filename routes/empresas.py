@@ -7,6 +7,7 @@ from services.utils import parse_float
 empresas_bp = Blueprint("empresas", __name__)
 
 
+
 # ------------------ CADASTRO DE AÇÕES ------------------
 @empresas_bp.route("/cadastro_de_acao")
 @login_required

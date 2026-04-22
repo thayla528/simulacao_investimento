@@ -5,8 +5,97 @@ import os
 from routes.auth import auth_bp, login_required
 from services.yfinance_service import yfinance_bp, obter_preco_atual
 
-perfil_bp = Blueprint("perfil", __name__)
+from flask import jsonify
 
+perfil_bp = Blueprint("perfil", __name__, url_prefix="/perfil")
+
+@perfil_bp.route("/cotacao/<ticker>")
+def cotacao(ticker):
+    from services.yfinance_service import obter_historico
+
+    ticker = ticker.strip().upper()
+
+    return jsonify(obter_historico(ticker))
+
+@perfil_bp.route("/historico/<ticker>")
+@login_required
+def historico(ticker):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT data, lucro
+        FROM historico_acoes
+        WHERE usuario_id = ? AND ticker = ?
+        ORDER BY data ASC
+    """, (session["usuario_id"], ticker))
+
+    dados = cursor.fetchall()
+    conn.close()
+
+    return jsonify({
+        "labels": [d["data"] for d in dados],
+        "valores": [d["lucro"] for d in dados]
+    })
+
+@perfil_bp.route('/portifolio')
+@login_required
+def portifolio():
+    if "usuario_id" not in session:
+        return redirect(url_for("login"))
+
+    usuario_id = session["usuario_id"]
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Soma todas as ações da empresa, independente do tipo
+    cursor.execute("""
+        SELECT empresa, ticker, SUM(num_acoes) as total_acoes
+        FROM empresas
+        WHERE usuario_id = ?
+        GROUP BY empresa, ticker
+        ORDER BY empresa
+    """, (usuario_id,))
+
+    portfolio = cursor.fetchall()
+    conn.close()
+
+    return render_template('portifolio.html', portfolio=portfolio)
+
+# ================= DETALHE DA AÇÃO =================
+@perfil_bp.route('/detalhe_acao/<ticker>/<tipo>')
+@login_required
+def detalhe_acao(ticker, tipo):
+    if "usuario_id" not in session:
+        return redirect(url_for("login"))
+
+    usuario_id = session["usuario_id"]
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # Pega todas as ações da empresa, agrupando por tipo_acao
+    cursor.execute("""
+        SELECT tipo_acao,
+               SUM(num_acoes) AS total_acoes,
+               AVG(preco_acao) AS preco_medio,
+               MIN(lote) AS lote_min,
+               MAX(lote) AS lote_max,
+               GROUP_CONCAT(setor, ', ') AS setores
+        FROM empresas
+        WHERE usuario_id = ? AND ticker = ?
+        GROUP BY tipo_acao
+        ORDER BY tipo_acao
+    """, (usuario_id, ticker))
+
+    detalhes = cursor.fetchall()
+    conn.close()
+
+    # Nome da empresa para o cabeçalho
+    acao = detalhes[0] if detalhes else None
+
+    return render_template('detalhe_acao.html', acao=acao, detalhes=detalhes)
 
 # ------------------ PERFIL ------------------
 @perfil_bp.route("/perfil")

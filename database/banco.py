@@ -19,6 +19,8 @@ def criar_tabela():
         )
     """)
 
+
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS empresas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,6 +50,18 @@ def criar_tabela():
             lucro REAL
         )
     """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS historico_acoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            ticker TEXT NOT NULL,
+            data TEXT NOT NULL,
+            lucro REAL DEFAULT 0
+        )
+    """)
+
+
 
     conn.commit()
     conn.close()

@@ -72,7 +72,7 @@ body {
             </p>
         </div>
 
-        <!-- PERFIL -->
+
         <!-- PERFIL -->
         <div class="flex items-center gap-6 p-4 glass-card rounded-xl">
             <div class="relative group">
@@ -146,11 +146,31 @@ body {
         <!-- INDICADORES -->
         <div class="flex flex-col gap-4">
 
-            <div class="glass-card flex-1 flex flex-col justify-center border-l-4 border-precision">
-                <h3 class="text-4xl font-black text-white">{{ empresas|length }}</h3>
-                <p class="text-[10px] uppercase font-bold text-white/40 tracking-widest">
-                    Empresas Monitoradas
+            <div class="glass-card flex-1 flex flex-col justify-between border-l-4 border-precision group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+
+                <!-- título -->
+                <p class="text-[10px] uppercase text-white/40 mb-4 tracking-widest">
+                    Portfolio
                 </p>
+
+                <!-- botão -->
+                <a href="{{ url_for('perfil.portifolio') }}"
+                   class="relative flex items-center justify-center w-full h-24 rounded-xl
+                   bg-surface-container-highest border border-white/5
+                   transition-all duration-300
+                   hover:bg-surface-container-low hover:border-pink-300/20">
+
+                    <!-- glow -->
+                    <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-300 to-red-500 opacity-0 group-hover:opacity-10 transition"></div>
+
+                    <!-- ícone rosa bebê -->
+                    <span class="material-symbols-outlined text-6xl transition-all duration-300"
+                          style="color: var(--pink-baby);">
+                        inventory_2
+                    </span>
+
+                </a>
+
             </div>
 
             <div class="glass-card flex-1 flex flex-col justify-center border-l-4"
@@ -210,8 +230,33 @@ body {
                             R$ {{ "%.2f"|format(empresa.preco_atual_b3 or empresa.preco_acao) }}
                         </td>
 
-                        <td class="px-8 py-4 text-right font-black {% if (empresa.variacao_valor|float) >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
-                            R$ {{ "%.2f"|format(empresa.variacao_valor or 0) }}
+                        <td class="px-8 py-4 text-right font-black">
+                            <div class="flex items-center justify-end gap-2
+                                {% if (empresa.variacao_valor|float) >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+
+                                <!-- botão seta -->
+                                <!-- botão seta -->
+                                <button onclick="abrirGrafico('{{ empresa.ticker }}')"
+                                        class="hover:scale-125 transition flex items-center justify-center">
+
+                                    {% if (empresa.variacao_valor|float) >= 0 %}
+                                        <span class="material-symbols-outlined text-2xl text-green-500 drop-shadow-[0_0_6px_rgba(0,200,83,0.6)]">
+                                            trending_up
+                                        </span>
+                                    {% else %}
+                                        <span class="material-symbols-outlined text-2xl text-red-500 drop-shadow-[0_0_6px_rgba(192,0,20,0.6)]">
+                                            trending_down
+                                        </span>
+                                    {% endif %}
+
+                                </button>
+
+                                <!-- valor -->
+                                <span>
+                                    R$ {{ "%.2f"|format(empresa.variacao_valor or 0) }}
+                                </span>
+
+                            </div>
                         </td>
 
                         <td class="px-8 py-4 text-center">
@@ -237,11 +282,37 @@ body {
             </table>
         </div>
     </div>
+    <div id="modalGrafico"
+     class="fixed inset-0 hidden items-center justify-center bg-black/80 backdrop-blur-sm z-50">
+
+    <div class="bg-surface p-6 rounded-2xl w-full max-w-2xl relative">
+
+        <!-- fechar -->
+        <button onclick="fecharGrafico()"
+                class="absolute top-4 right-4 text-white text-xl">
+            ✕
+        </button>
+
+        <h2 class="text-xl font-bold text-gradient-pink-red mb-4 text-center">
+            Histórico de Lucro/Perda
+        </h2>
+
+        <div style="height: 300px;">
+            <canvas id="graficoHistorico"></canvas>
+        </div>
+
+    </div>
+</div>
 </div>
 
 <script src="https://jsdelivr.net"></script>
 
 <script>
+let graficoInstance = null;
+
+/* =======================
+   GRÁFICO PRINCIPAL
+======================= */
 try {
     const ctx = document.getElementById('lucroChart').getContext('2d');
 
@@ -267,20 +338,104 @@ try {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
             scales: {
                 y: {
                     beginAtZero: false,
                     grid: { color: 'rgba(255,255,255,0.1)' },
                     ticks: { color: '#666' }
                 },
-                x: { display: false }
+                x: {
+                    display: false
+                }
             }
         }
     });
 
 } catch (e) {
-    console.error("Erro ao carregar gráfico:", e);
+    console.error("Erro ao carregar gráfico principal:", e);
+}
+
+
+/* =======================
+   ABRIR GRÁFICO POR TICKER
+======================= */
+function abrirGrafico(ticker) {
+    const modal = document.getElementById('modalGrafico');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    fetch(`/perfil/cotacao/${ticker}`)
+        .then(res => res.json())
+        .then(data => {
+
+            const ctx = document.getElementById('graficoHistorico').getContext('2d');
+
+            if (graficoInstance) {
+                graficoInstance.destroy();
+            }
+
+            if (!data.labels || data.labels.length === 0) {
+                console.warn("Sem histórico para:", ticker);
+                return;
+            }
+
+            const cor = data.valores[data.valores.length - 1] >= 0
+                ? '#00c853'
+                : '#c00014';
+
+            graficoInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                    label: ticker,
+                    data: data.valores,
+                    borderColor: cor,
+                    backgroundColor: 'rgba(249, 168, 177, 0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 2,
+                    pointBackgroundColor: cor,
+                    borderWidth: 2
+                }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#666' },
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: { color: '#666' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+
+        })
+        .catch(err => {
+            console.error("Erro ao buscar histórico:", err);
+        });
+}
+
+
+/* =======================
+   FECHAR MODAL
+======================= */
+function fecharGrafico() {
+    const modal = document.getElementById('modalGrafico');
+    modal.classList.add('hidden');
+
+    if (graficoInstance) {
+        graficoInstance.destroy();
+        graficoInstance = null;
+    }
 }
 </script>
 

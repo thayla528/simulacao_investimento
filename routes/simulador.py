@@ -68,7 +68,11 @@ def editar_simulador(id):
         if tipo_tempo == "anos":
             tempo = tempo * 12
 
-        taxa, lucro = calcular_resultado(valor, tipo, tempo)
+        # 🔥 pega taxa do slider
+        taxa = float(request.form.get('taxa_final', 0)) / 100
+
+        # 🔥 calcula lucro
+        lucro = valor * taxa * (tempo / 12)
 
         cursor.execute("""
             UPDATE investimentos
@@ -131,29 +135,61 @@ def investimentos():
         valor = float(request.form.get('valor_investido', 0))
         tempo = int(request.form.get('tempo', 0))
 
-        # 🔥 TAXA AUTOMÁTICA DO MERCADO
-        taxa, lucro = calcular_resultado(valor, tipo, tempo)
+        tipo_tempo = request.form.get('tipo_tempo', 'meses')
+        if tipo_tempo == "anos":
+            tempo *= 12
 
+        # 🔥 taxa automática
+        taxa_base, _ = calcular_resultado(valor, tipo, tempo)
 
+        # 🔥 percentual do slider
+        percentual = float(request.form.get('percentual_taxa', 100))
+
+        # 🔥 aplica percentual
+        taxa_final = taxa_base * (percentual / 100)
+
+        # 🔥 lucro
+        lucro = valor * taxa_final * (tempo / 12)
 
         cursor.execute("""
             INSERT INTO investimentos (
-                usuario_id, tipo, valor_investido, taxa, tempo, lucro
+                usuario_id, tipo, valor_investido, taxa, tempo, lucro, percentual
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             session['usuario_id'],
-            tipo, valor, taxa * 100, tempo, lucro
+            tipo,
+            valor,
+            taxa_final * 100,
+            tempo,
+            lucro,
+            percentual
         ))
 
         conn.commit()
 
+    # 🔥 ISSO TEM QUE FICAR FORA DO IF
     cursor.execute(
         "SELECT * FROM investimentos WHERE usuario_id = ?",
         (session['usuario_id'],)
     )
 
     dados = cursor.fetchall()
+
+    # 🔥 CONVERTE PARA DICIONÁRIO
+    dados_formatados = []
+
+    for d in dados:
+        dados_formatados.append({
+            "id": d["id"],  # 🔥 FALTAVA ISSO
+            "tipo": d["tipo"],
+            "valor_investido": d["valor_investido"],
+            "taxa": d["taxa"],
+            "tempo": d["tempo"],
+            "lucro": d["lucro"],
+            "percentual": d["percentual"]
+        })
+
     conn.close()
 
-    return render_template('simulador.html', investimentos=dados)
+    return render_template('simulador.html', investimentos=dados_formatados)

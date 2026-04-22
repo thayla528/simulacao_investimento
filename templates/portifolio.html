@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+
+<!-- botão voltar -->
+    <div class="max-w-6xl mx-auto mt-12 px-4">
+
+    <!-- botão voltar -->
+    <a href="{{ url_for('perfil.perfil') }}"
+       class="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-xl
+       bg-surface border border-white/10
+       hover:border-pink-300/40 hover:bg-surface-container-low
+       transition-all duration-300 group">
+
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-5 w-5 text-pink-300 transition-transform duration-300 group-hover:-translate-x-1"
+             fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 19l-7-7 7-7" />
+        </svg>
+
+        <span class="text-sm font-semibold text-pink-300">
+            Voltar
+        </span>
+
+    </a>
+<div class="max-w-6xl mx-auto mt-12 px-4">
+
+    <!-- Título -->
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">
+            Seu Portfólio
+        </h1>
+    </div>
+
+    {% if portfolio %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+
+        {% for grupo in portfolio %}
+        <div class="group relative p-6 rounded-2xl bg-surface border border-white/10 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+
+            <!-- efeito glow -->
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 opacity-0 group-hover:opacity-10 transition"></div>
+
+            <!-- conteúdo -->
+            <div class="relative z-10">
+
+                <!-- empresa -->
+                <h2 class="text-xl font-bold text-white group-hover:text-red-400 transition">
+                    {{ grupo.empresa }}
+                </h2>
+
+
+
+                <!-- botão -->
+                <a href="{{ url_for('perfil.detalhe_acao', ticker=grupo.ticker, tipo='todas') }}"
+                   class="mt-5 inline-block w-full text-center px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-bold tracking-wide hover:scale-105 transition">
+                    Ver Detalhes →
+                </a>
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+    {% else %}
+
+    <!-- estado vazio melhorado -->
+    <div class="text-center mt-16">
+        <p class="text-gray-400 text-lg">Nenhum investimento ainda</p>
+        <p class="text-sm text-gray-500 mt-2">Comece adicionando sua primeira ação 📈</p>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

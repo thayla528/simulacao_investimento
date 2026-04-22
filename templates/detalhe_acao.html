@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<div class="max-w-6xl mx-auto mt-12 px-4">
+
+    <!-- botão voltar -->
+    <a href="{{ url_for('perfil.portifolio') }}" class="flex items-center mb-8">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-5 w-5"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 19l-7-7 7-7" />
+        </svg>
+    </a>
+
+    {% if acao %}
+
+    <!-- título -->
+    <div class="mb-10 text-center">
+        <h1 class="text-3xl font-black bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">
+            Detalhes dos seus investimentos
+        </h1>
+    </div>
+
+    {% if detalhes %}
+
+    <!-- GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+
+        {% for a in detalhes %}
+        <div onclick="abrirModal('{{ loop.index }}')"
+             class="cursor-pointer group relative p-6 rounded-2xl bg-surface border border-white/10 shadow-md
+             hover:shadow-xl hover:-translate-y-1 hover:border-red-500 transition-all duration-300">
+
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 opacity-0 group-hover:opacity-10 transition"></div>
+
+            <div class="relative z-10">
+
+                <!-- tipo ação -->
+                <h3 class="text-3xl display:flex flex diretion:center font-black bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">
+                    Tipo de ação {{ a.tipo_acao }}
+                </h3>
+
+                <!-- resumo -->
+                <div class="mt-4 text-sm text-gradient-pink-red">
+                    Clique para ver detalhes
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- MODAL ÚNICO -->
+    <div id="modal"
+         class="fixed inset-0 hidden items-center justify-center bg-black/70 backdrop-blur-sm z-50">
+
+        <div id="modalContent"
+             class="bg-surface p-8 rounded-2xl w-full max-w-md relative border border-white/10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300">
+
+            <!-- fechar -->
+            <button onclick="fecharModal()"
+                    class="absolute top-4 right-4 text-gradient-pink-red hover:opacity-70 text-xl">
+                ✕
+            </button>
+
+            <!-- título (MANTIDO diferente) -->
+
+
+            <div class="space-y-3 text-sm pt-6">
+
+                <div class="flex flex-col items-center justify-center gap-2 mb-4">
+
+                    <!-- ícone vermelho -->
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-6 w-6 text-red-500"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3 3v18h18M7 14l3-3 4 4 5-5"/>
+                    </svg>
+
+                    <!-- título centralizado maior -->
+                    <span class="text-xl font-bold text-gradient-pink-red text-center">
+                        Detalhes da ação
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gradient-pink-red">Ações</span>
+                    <span id="modalAcoes" class="text-gradient-pink-red"></span>
+                </div>
+
+
+
+                <div class="flex justify-between">
+                    <span class="text-gradient-pink-red">Preço Médio</span>
+                    <span id="modalPreco" class="text-gradient-pink-red"></span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gradient-pink-red">Setor</span>
+                    <span id="modalSetor" class="text-gradient-pink-red"></span>
+                </div>
+
+                <div class="flex justify-between">
+                    <span class="text-gradient-pink-red">Lote</span>
+                    <span id="modalLote" class="text-gradient-pink-red"></span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+        const dados = [
+            {% for a in detalhes %}
+            {
+
+                tipo: "{{ a.tipo_acao }}",
+                acoes: "{{ a.total_acoes }}",
+                preco: "R$ {{ a.preco_medio | round(2) }}",
+                setor: "{{ a.setores }}",
+                lote: "{{ a.lote_min }} - {{ a.lote_max }}"
+            },
+            {% endfor %}
+        ];
+
+        function abrirModal(index) {
+            const item = dados[index - 1];
+
+
+            document.getElementById('modalAcoes').innerText = item.acoes;
+            document.getElementById('modalPreco').innerText = item.preco;
+            document.getElementById('modalSetor').innerText = item.setor;
+            document.getElementById('modalLote').innerText = item.lote;
+
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+            }, 50);
+        }
+
+        function fecharModal() {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+
+            content.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        }
+    </script>
+
+    {% else %}
+    <div class="text-center mt-16">
+        <p class="text-gray-400 text-lg">Nenhum tipo de ação encontrado</p>
+        <p class="text-sm text-gray-500 mt-2">Adicione novos dados para visualizar aqui</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center mt-16">
+        <p class="text-red-400 text-lg font-bold">Empresa não encontrada</p>
+        <p class="text-sm text-gray-500 mt-2">Verifique se selecionou corretamente</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
