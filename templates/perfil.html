@@ -78,6 +78,8 @@ body {
             <div class="relative group">
 
                 {% if foto_path %}
+
+
                     <img src="{{ url_for('static', filename=foto_path) }}"
                          class="w-20 h-20 rounded-lg object-cover border-2"
                          style="border-color: var(--pink-text)">
@@ -88,15 +90,21 @@ body {
                          style="border-color: var(--pink-text)">
 
                 {% else %}
-                    <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/10">
-                        <span class="material-symbols-outlined text-3xl text-white/20">person</span>
+                    <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/10 group transition">
+
+                        <span class="material-symbols-outlined text-5xl transition-colors duration-300
+                                     text-[var(--pink-baby)] group-hover:text-[var(--precision-red)]">
+                            account_circle
+                        </span>
+
                     </div>
                 {% endif %}
-
                 <form method="POST"
                       enctype="multipart/form-data"
                       action="{{ url_for('perfil.upload_foto') }}"
                       class="absolute -bottom-2 -right-2">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                     <label for="foto-input"
                            class="cursor-pointer bg-precision text-white p-1 rounded-md flex hover:scale-110 transition">
