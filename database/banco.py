@@ -5,11 +5,11 @@ def conectar():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def criar_tabela():
     conn = conectar()
     cursor = conn.cursor()
 
+    # --- TABELA DE USUÁRIOS ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,8 +19,7 @@ def criar_tabela():
         )
     """)
 
-
-
+    # --- TABELA DE EMPRESAS (AÇÕES) ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS empresas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,6 +38,7 @@ def criar_tabela():
         )
     """)
 
+    # --- TABELA DE INVESTIMENTOS (RENDA FIXA) ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS investimentos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,21 +47,23 @@ def criar_tabela():
             valor_investido REAL,
             taxa REAL,
             tempo INTEGER,
-            lucro REAL
+            lucro REAL,
+            percentual REAL DEFAULT 100
         )
     """)
 
+    # --- TABELA DE HISTÓRICO UNIFICADO ---
+    # Esta tabela servirá para Ações e Renda Fixa
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS historico_acoes (
+        CREATE TABLE IF NOT EXISTS historico (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER NOT NULL,
-            ticker TEXT NOT NULL,
-            data TEXT NOT NULL,
-            lucro REAL DEFAULT 0
+            usuario_id INTEGER,
+            ticker TEXT, 
+            acao TEXT, 
+            data_hora DATETIME,
+            FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
         )
     """)
-
-
 
     conn.commit()
     conn.close()

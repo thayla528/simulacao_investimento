@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+    .panel-dark { background-color: #0c0c0c; border: 1px solid #1c1b1b; }
+    .input-profile {
+        background: #0e0e0e; border: 1px solid #2a2a2a; color: white;
+        padding: 12px; border-radius: 6px; width: 100%; font-size: 0.8rem;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- BOTÃO VOLTAR PARA HISTÓRICO GERAL -->
+    <a href="{{ url_for('historico.historico') }}"
+       class="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-xl bg-[#0e0e0e] border border-white/10 hover:border-pink-300/40 transition-all group">
+        <svg xmlns="http://w3.org" class="h-5 w-5 text-pink-300 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span class="text-sm font-semibold text-pink-300">Voltar</span>
+    </a>
+
+    <div class="mb-10">
+        <h1 class="text-3xl font-black uppercase tracking-tighter">
+            <span class="text-gradient-pink-red">Logs de Renda Fixa</span>
+        </h1>
+        <p class="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase">Terminal de Auditoria • RF_MODULE</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+        <!-- COLUNA ESQUERDA (MANTIDA IGUAL) -->
+        <div class="space-y-6">
+            <div class="panel-dark p-8 rounded-xl opacity-60">
+                <h3 class="text-blue-500 font-black text-xs uppercase tracking-widest mb-6">Status do Terminal</h3>
+                <div class="text-[10px] text-white/40 uppercase">Usuário</div>
+                <div class="text-white font-mono text-sm mb-4">{{ usuario.email }}</div>
+                <div class="p-4 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest">
+                    Módulo de Renda Fixa Ativo
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: HISTÓRICO RF -->
+        <div class="lg:col-span-2">
+            <div class="panel-dark p-8 rounded-xl min-h-[500px]">
+                <h3 class="text-blue-500 font-black text-xs uppercase tracking-widest mb-6">Histórico RF</h3>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] text-white/20 uppercase border-b border-white/5">
+                                <th class="pb-4">Timestamp</th>
+                                <th class="pb-4">Produto</th>
+                                <th class="pb-4">Detalhes da Simulação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-[11px]">
+                            {% if logs %}
+                                {% for log in logs %}
+                                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition">
+                                    <td class="py-4 text-gray-500 font-mono">{{ log.data_hora }}</td>
+                                    <td class="py-4 font-black text-white uppercase">{{ log.ticker }}</td>
+                                    <td class="py-4">
+                                        {% if 'EXCLUSÃO' in log.acao %}
+                                            <span class="text-red-500 font-bold block italic">INVESTIMENTO REMOVIDO</span>
+                                        {% elif 'EDIÇÃO' in log.acao %}
+                                            <span class="text-amber-500 font-bold block italic">SIMULAÇÃO ALTERADA</span>
+                                        {% else %}
+                                            <span class="text-blue-400 font-bold block italic">NOVA SIMULAÇÃO RF</span>
+                                        {% endif %}
+                                        <span class="text-white/40 text-[10px]">{{ log.acao.split('RF: ')[1] if 'RF: ' in log.acao else log.acao }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="py-10 text-center text-white/10 uppercase tracking-widest font-bold">Nenhum log de renda fixa.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

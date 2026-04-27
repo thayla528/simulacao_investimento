@@ -79,6 +79,26 @@ body {
             <div class="h-1 w-12 bg-primary mx-auto mt-4"></div>
         </div>
 
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="p-4 mb-6 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center justify-between {% if category == 'error' %} border-primary bg-primary/10 text-primary {% else %} border-green-500 bg-green-500/10 text-green-500 {% endif %}">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm">
+                    {% if category == 'error' %}warning{% else %}check_circle{% endif %}
+                  </span>
+                  {{ message }}
+                </div>
+                <button onclick="this.parentElement.remove()" class="hover:opacity-70">
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+
         <!-- FORM CORRETO -->
         <form method="POST" action="{{ url_for('auth.cadastro') }}" class="space-y-6">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

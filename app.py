@@ -3,6 +3,9 @@ import os
 import pandas as pd
 
 import sys
+
+from routes.historico_perfil import historico_bp
+
 print(sys.executable)
 
 
@@ -28,6 +31,8 @@ app.register_blueprint(empresas_bp)
 app.register_blueprint(yfinance_bp)
 app.register_blueprint(simulador_bp)
 app.register_blueprint(perfil_bp)
+
+app.register_blueprint(historico_bp)
 
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,

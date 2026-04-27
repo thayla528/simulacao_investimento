@@ -121,13 +121,16 @@ body {
             </div>
 
             <div>
-                <div class="text-[10px] font-bold tracking-widest uppercase mb-1"
-                     style="color: var(--pink-text)">
-                    Operador Ativo
-                </div>
-                <div class="text-xl font-headline font-bold uppercase tracking-tight">
-                    {{ usuario }}
-                </div>
+                <a href="{{ url_for('historico.historico') }}">
+                    <div class="text-[10px] font-bold tracking-widest uppercase mb-1"
+                         style="color: var(--pink-text)">
+                        Operador Ativo
+                    </div>
+                    <div class="text-xl font-headline font-bold uppercase tracking-tight">
+                        {{ usuario }}
+
+                    </div>
+                </a>
             </div>
         </div>
     </div>

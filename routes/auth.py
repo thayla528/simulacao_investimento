@@ -105,6 +105,55 @@ def cadastro():
     return render_template("cadastro.html")
 
 
+@auth_bp.route("/excluir_conta", methods=["POST"])
+@login_required
+def excluir_conta():
+    usuario_id = session.get("usuario_id")
+
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+
+        # Opcional: Deletar manualmente se não houver CASCADE no banco
+        cursor.execute("DELETE FROM empresas WHERE usuario_id = ?", (usuario_id,))
+        cursor.execute("DELETE FROM historico WHERE usuario_id = ?", (usuario_id,))
+        cursor.execute("DELETE FROM investimentos WHERE usuario_id = ?", (usuario_id,))
+
+        # Deleta o usuário
+        cursor.execute("DELETE FROM usuarios WHERE id = ?", (usuario_id,))
+
+        conn.commit()
+        conn.close()
+
+        session.clear()
+        flash("Sua conta e todos os dados foram excluídos permanentemente.", "warning")
+        return redirect(url_for("auth.login"))
+
+    except Exception as e:
+        print(f"Erro ao excluir conta: {e}")
+        flash("Erro ao processar a exclusão da conta.", "danger")
+        return redirect(url_for("historico.historico"))
+
+
+@auth_bp.route("/alterar_perfil", methods=["POST"])
+@login_required
+def alterar_perfil():
+    nova_senha = request.form.get("nova_senha")
+    usuario_id = session.get("usuario_id")
+
+    if nova_senha:
+        hash_senha = generate_password_hash(nova_senha)
+        conn = conectar()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE usuarios SET senha = ? WHERE id = ?", (hash_senha, usuario_id))
+        conn.commit()
+        conn.close()
+        flash("Senha atualizada com sucesso!", "success")
+    else:
+        flash("Nenhuma alteração realizada.", "info")
+
+    return redirect(url_for("historico.historico"))
+
 # ---------------- LOGOUT ----------------
 @auth_bp.route("/logout")
 def logout():

@@ -262,12 +262,12 @@ body {
                                class="w-full input-precision">
                     </div>
 
-                    <select name="tipo_acao"
-                            class="w-full input-precision text-[9px] font-bold">
-                        <option value="ON">ON</option>
-                        <option value="PN">PN</option>
-                        <option value="UNIT">UNIT</option>
-                    </select>
+                    <!-- Exemplo de como deve estar o campo no seu formulário -->
+                    <div class="flex flex-col">
+                        <label class="text-[10px] text-white/40 uppercase mb-2">Tipo de Ação</label>
+                        <input type="text" name="tipo_acao" id="tipo_acao" class="input-precision" placeholder="Ex: ON, PN, UNIT">
+                    </div>
+
 
                 </div>
 
@@ -314,7 +314,7 @@ body {
     </div>
 </div>
 
-<script>
+<<script>
 async function buscarDadosB3() {
     const tickerInput = document.getElementById('input_ticker');
     const icon = document.getElementById('icon_lupa');
@@ -322,6 +322,7 @@ async function buscarDadosB3() {
 
     if (!ticker) return;
 
+    // Feedback visual de carregamento
     icon.innerHTML = "sync";
     icon.classList.add("animate-spin-slow");
 
@@ -332,7 +333,7 @@ async function buscarDadosB3() {
         if (data.erro) {
             alert("Ativo não encontrado no Terminal B3.");
         } else {
-            // Preenchimento Automático usando os dados da sua rota Python
+            // PREENCHIMENTO AUTOMÁTICO - Ajustado para os seus IDs reais
             document.getElementById('input_empresa').value = data.nome || "";
             document.getElementById('input_setor').value = data.setor || "";
             document.getElementById('input_preco').value = data.preco || "";
@@ -340,13 +341,25 @@ async function buscarDadosB3() {
             document.getElementById('input_patrimonio').value = data.patrimonio || 0;
             document.getElementById('input_ativos').value = data.ativos || 0;
             document.getElementById('input_divida').value = data.divida || 0;
+
+            // AQUI ESTÁ A AUTOMAÇÃO DO TIPO DE AÇÃO
+            if (data.tipo_acao) {
+                document.getElementById('tipo_acao').value = data.tipo_acao;
+            }
         }
     } catch (e) {
-        console.error("Erro na sincronização");
+        console.error("Erro na sincronização:", e);
     } finally {
         icon.innerHTML = "search";
         icon.classList.remove("animate-spin-slow");
     }
 }
+
+// Faz a busca automática ao sair do campo de Ticker
+document.getElementById('input_ticker').addEventListener('blur', buscarDadosB3);
 </script>
+
+
+
+
 {% endblock %}

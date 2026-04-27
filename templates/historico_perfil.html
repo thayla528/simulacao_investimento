@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<style>
+    .panel-dark { background-color: #0c0c0c; border: 1px solid #1c1b1b; }
+    .input-profile {
+        background: #0e0e0e; border: 1px solid #2a2a2a; color: white;
+        padding: 12px; border-radius: 6px; width: 100%; font-size: 0.8rem;
+    }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 py-12">
+
+    <div class="mb-10">
+        <h1 class="text-3xl font-black uppercase tracking-tighter">
+            <span class="text-gradient-pink-red">Central do Investidor</span>
+        </h1>
+        <p class="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase">Terminal de Segurança e Logs</p>
+    </div>
+
+    <a href="{{ url_for('perfil.perfil') }}"
+       class="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-xl
+       bg-surface border border-white/10
+       hover:border-pink-300/40 hover:bg-surface-container-low
+       transition-all duration-300 group">
+
+        <svg xmlns="http://w3.org"
+             class="h-5 w-5 text-pink-300 transition-transform duration-300 group-hover:-translate-x-1"
+             fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 19l-7-7 7-7" />
+        </svg>
+
+        <span class="text-sm font-semibold text-pink-300">
+            Voltar
+        </span>
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+        <!-- COLUNA ESQUERDA: PERFIL E SENHA -->
+        <div class="space-y-6">
+            <div class="panel-dark p-8 rounded-xl">
+                <h3 class="text-red-600 font-black text-xs uppercase tracking-widest mb-6">Dados da Conta</h3>
+
+                <form action="{{ url_for('auth.alterar_perfil') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div>
+                        <label class="text-[10px] text-white/40 uppercase block mb-2">E-mail de Acesso</label>
+                        <input type="text" value="{{ usuario.email }}" class="input-profile opacity-50" readonly>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-white/40 uppercase block mb-2">Nova Senha</label>
+                        <input type="password" name="nova_senha" placeholder="DEIXE EM BRANCO PARA MANTER" class="input-profile focus:border-red-600 outline-none">
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-pink-red text-white font-black py-3 rounded-md text-[10px] uppercase tracking-widest hover:scale-[1.02] transition">
+                        Atualizar Credenciais
+                    </button>
+                </form>
+
+                <div class="mt-10 pt-6 border-t border-red-900/20">
+                    <h4 class="text-[9px] font-black text-red-600 uppercase tracking-[0.2em] mb-4">Zona Crítica</h4>
+                    <form action="{{ url_for('auth.excluir_conta') }}" method="POST"
+                          onsubmit="return confirm('ATENÇÃO: Esta ação é irreversível. Todos os seus dados serão apagados. Deseja continuar?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <button type="submit" class="w-full border border-red-600/30 text-red-500 hover:bg-red-600 hover:text-white transition py-3 rounded-md text-[9px] font-black uppercase tracking-widest">
+                            Deletar Minha Conta Permanentemente
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: HISTÓRICO -->
+        <div class="lg:col-span-2">
+            <div class="panel-dark p-8 rounded-xl min-h-[500px] flex flex-col">
+                <h3 class="text-red-600 font-black text-xs uppercase tracking-widest mb-6">Histórico de Operações</h3>
+
+                <div class="overflow-x-auto flex-grow">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] text-white/20 uppercase border-b border-white/5">
+                                <th class="pb-4">Timestamp</th>
+                                <th class="pb-4">Ativo</th>
+                                <th class="pb-4">Detalhes da Operação</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-[11px]">
+                            {% if logs %}
+                                {% for log in logs %}
+                                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition">
+                                    <td class="py-4 text-gray-500 font-mono">{{ log.data_hora }}</td>
+                                    <td class="py-4 font-black text-white uppercase">{{ log.ticker }}</td>
+                                    <td class="py-4">
+                                        {% if 'EXCLUSÃO' in log.acao %}
+                                            <span class="text-red-500 font-bold block">POSIÇÃO ENCERRADA</span>
+                                            <span class="text-white/40 text-[10px]">{{ log.acao.replace('EXCLUSÃO: ', '') }}</span>
+                                        {% elif 'EDIÇÃO' in log.acao %}
+                                            <span class="text-amber-500 font-bold block">VALORES ALTERADOS</span>
+                                            <span class="text-white/40 text-[10px]">{{ log.acao.replace('EDIÇÃO: ', '') }}</span>
+                                        {% elif 'CADASTRO' in log.acao %}
+                                            <span class="text-emerald-500 font-bold block">NOVO APORTE (ENTRADA)</span>
+                                            <span class="text-white/40 text-[10px]">{{ log.acao.replace('CADASTRO: ', '') }}</span>
+                                        {% else %}
+                                            <span class="text-emerald-500 font-bold block">REGISTRO GERAL</span>
+                                            <span class="text-white/40 text-[10px]">{{ log.acao }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="py-10 text-center text-white/10 uppercase tracking-widest font-bold">Nenhuma atividade registrada.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- BOTÃO RENDA FIXA NO FIM À DIREITA -->
+                <div class="flex justify-end mt-6">
+                    <a href="{{ url_for('historico.historico_rf') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl
+                              bg-surface border border-white/10
+                              hover:border-pink-300/40 hover:bg-surface-container-low
+                              transition-all duration-300 group">
+
+                        <span class="text-sm font-semibold text-pink-300">
+                            Renda fixa
+                        </span>
+
+                        <svg xmlns="http://w3.org"
+                             class="h-5 w-5 text-pink-300 transition-transform duration-300 group-hover:translate-x-1"
+                             fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
