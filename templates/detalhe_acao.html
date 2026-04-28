@@ -4,13 +4,23 @@
 <div class="max-w-6xl mx-auto mt-12 px-4">
 
     <!-- botão voltar -->
-    <a href="{{ url_for('perfil.portifolio') }}" class="flex items-center mb-8">
+    <a href="{{ url_for('perfil.portifolio') }}"
+       class="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-xl
+       bg-surface border border-white/10
+       hover:border-pink-300/40 hover:bg-surface-container-low
+       transition-all duration-300 group">
+
         <svg xmlns="http://www.w3.org/2000/svg"
-             class="h-5 w-5"
-             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             class="h-5 w-5 text-pink-300 transition-transform duration-300 group-hover:-translate-x-1"
+             fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M15 19l-7-7 7-7" />
         </svg>
+
+        <span class="text-sm font-semibold text-pink-300">
+            Voltar
+        </span>
     </a>
 
     {% if acao %}

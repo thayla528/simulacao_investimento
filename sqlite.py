@@ -10,4 +10,4 @@ cursor.execute("DELETE FROM investimentos")
 conn.commit()
 conn.close()
 
-print("🔥 BANCO LIMPO DE VERDADE")
+print("BANCO LIMPO DE VERDADE")

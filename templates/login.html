@@ -6,7 +6,9 @@
 <title>Precision Invest - Login</title>
 
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
 <script>
 tailwind.config = {
@@ -16,8 +18,6 @@ tailwind.config = {
                 primary: "#c00014",
                 "primary-fixed-dim": "#f9a8b1",
                 "surface": "#000000",
-                "surface-container-low": "#0e0e0e",
-                "on-surface": "#e5e2e1",
             },
             fontFamily: {
                 headline: ["Manrope"],
@@ -63,82 +63,95 @@ body {
     box-shadow: 0 0 20px rgba(192, 0, 20, 0.3);
 }
 </style>
-
 </head>
 
-<body class="bg-surface font-body text-on-surface">
+<body class="bg-surface font-body text-white">
 
-<header class="fixed top-0 w-full flex justify-between items-center px-6 h-16 bg-black/50 backdrop-blur-md border-b border-white/5">
-    <h1 class="text-xl font-black uppercase tracking-tighter text-primary-fixed-dim">Precision Invest</h1>
-</header>
+<main class="min-h-screen flex flex-col items-center justify-center px-6">
 
-<main class="min-h-screen flex justify-center items-center px-6">
+    <section class="w-full max-w-sm login-card p-8 rounded-2xl space-y-8">
 
-<section class="w-full max-w-sm login-card p-8 rounded-2xl space-y-10">
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary text-center mb-2">System Access V2.4</p>
+            <h1 class="text-3xl font-headline font-black tracking-tighter text-center uppercase">
+                Acessar <span class="text-primary-fixed-dim">Terminal</span>
+            </h1>
+            <div class="h-1 w-12 bg-primary mx-auto mt-4"></div>
+        </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="space-y-2">
-          {% for category, message in messages %}
-            <div class="p-3 rounded-lg border text-[10px] font-bold uppercase tracking-widest text-center
-                {% if category == 'danger' %} border-primary text-primary bg-primary/10
-                {% else %} border-primary-fixed-dim text-primary-fixed-dim bg-primary-fixed-dim/10 {% endif %}">
-              {{ message }}
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="p-4 mb-6 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center justify-between {% if category == 'danger' or category == 'error' %} border-primary bg-primary/10 text-primary {% else %} border-green-500 bg-green-500/10 text-green-500 {% endif %}">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-sm">
+                    {% if category == 'danger' or category == 'error' %}warning{% else %}check_circle{% endif %}
+                  </span>
+                  {{ message }}
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" class="hover:opacity-70">
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2">E-mail</label>
+                    <input type="email" name="form-email" placeholder="NOME@EXEMPLO.COM" required
+                        class="w-full p-4 rounded-lg input-precision text-sm uppercase">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2">Senha</label>
+                    <div class="relative">
+                        <input id="password-field" type="password" name="form-senha" placeholder="••••••••" required
+                            class="w-full p-4 pr-12 rounded-lg input-precision text-sm">
+                        <button type="button" onclick="togglePass()" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary-fixed-dim hover:text-primary transition-colors">
+                            <span id="eye-icon" class="material-symbols-outlined text-lg">visibility</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
 
-    <div class="text-center">
-        <h1 class="text-3xl font-black uppercase tracking-tighter">
-            Acesse seu <span class="text-primary">Terminal</span>
-        </h1>
-    </div>
+            <div class="pt-4">
+                <button type="submit" class="w-full h-14 bg-gradient-to-br from-primary-fixed-dim to-primary text-white font-headline font-black uppercase tracking-widest text-[10px] rounded-lg neon-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                    Entrar no Sistema
+                    <span class="material-symbols-outlined text-lg">login</span>
+                </button>
+            </div>
 
-    <!-- FORM CORRIGIDO -->
-    <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-6">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
 
-        <div>
-            <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Email</label>
-            <input
-                type="email"
-                name="form-email"
-                required
-                placeholder="nome@email.com"
-                class="w-full p-4 rounded-lg input-precision"
-            >
-        </div>
+        <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            Ainda não tem conta?
+            <a href="{{ url_for('auth.cadastro') }}" class="text-primary-fixed-dim hover:text-primary transition-colors">
+                Criar Conta
+            </a>
+        </p>
 
-        <div>
-            <label class="text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2 block">Senha</label>
-            <input
-                type="password"
-                name="form-senha"
-                required
-                placeholder="••••••••"
-                class="w-full p-4 rounded-lg input-precision"
-            >
-        </div>
-
-        <button type="submit" class="w-full h-14 bg-gradient-to-br from-primary-fixed-dim to-primary text-white font-black uppercase tracking-widest rounded-lg neon-glow hover:brightness-110 transition-all active:scale-95">
-            Entrar
-        </button>
-
-    </form>
-
-    <!-- LINK CORRIGIDO -->
-    <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
-        Não tem conta?
-        <a href="{{ url_for('auth.cadastro') }}" class="text-primary-fixed-dim hover:text-primary transition-colors">
-            Cadastrar
-        </a>
-    </p>
-
-</section>
-
+    </section>
 </main>
+
+<script>
+function togglePass() {
+    const field = document.getElementById('password-field');
+    const icon = document.getElementById('eye-icon');
+    if (field.type === "password") {
+        field.type = "text";
+        icon.innerText = "visibility_off";
+    } else {
+        field.type = "password";
+        icon.innerText = "visibility";
+    }
+}
+</script>
 
 </body>
 </html>

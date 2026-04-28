@@ -86,11 +86,11 @@ body {
               <div class="p-4 mb-6 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center justify-between {% if category == 'error' %} border-primary bg-primary/10 text-primary {% else %} border-green-500 bg-green-500/10 text-green-500 {% endif %}">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-sm">
-                    {% if category == 'error' %}warning{% else %}check_circle{% endif %}.
+                    {% if category == 'error' %}warning{% else %}check_circle{% endif %}
                   </span>
                   {{ message }}
                 </div>
-                <button onclick="this.parentElement.remove()" class="hover:opacity-70">
+                <button type="button" onclick="this.parentElement.remove()" class="hover:opacity-70">
                   <span class="material-symbols-outlined text-sm">close</span>
                 </button>
               </div>
@@ -119,8 +119,13 @@ body {
 
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-primary-fixed-dim ml-2 mb-2">Senha</label>
-                    <input type="password" name="senha" placeholder="••••••••" required
-                        class="w-full p-4 rounded-lg input-precision text-sm">
+                    <div class="relative">
+                        <input id="password-field" type="password" name="senha" placeholder="••••••••" required
+                            class="w-full p-4 pr-12 rounded-lg input-precision text-sm">
+                        <button type="button" onclick="togglePass()" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary-fixed-dim hover:text-primary transition-colors">
+                            <span id="eye-icon" class="material-symbols-outlined text-lg">visibility</span>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -134,7 +139,6 @@ body {
 
         </form>
 
-        <!-- LINK CORRIGIDO -->
         <p class="text-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
             Já possui acesso?
             <a href="{{ url_for('auth.login') }}" class="text-primary-fixed-dim hover:text-primary transition-colors">
@@ -144,5 +148,20 @@ body {
 
     </section>
 </main>
+
+<script>
+function togglePass() {
+    const field = document.getElementById('password-field');
+    const icon = document.getElementById('eye-icon');
+    if (field.type === "password") {
+        field.type = "text";
+        icon.innerText = "visibility_off";
+    } else {
+        field.type = "password";
+        icon.innerText = "visibility";
+    }
+}
+</script>
+
 </body>
 </html>
