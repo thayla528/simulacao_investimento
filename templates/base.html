@@ -47,10 +47,12 @@
 <nav class="fixed bottom-0 left-0 w-full z-[100] flex justify-around items-center px-6 h-24 bg-black/80 backdrop-blur-xl border-t border-white/5 shadow-[0px_-10px_30px_rgba(0,0,0,0.5)]">
 
     <!-- PERFIL -->
+        <!-- PORTFÓLIO -->
     <a href="{{ url_for('perfil.perfil') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
-        <span class="material-symbols-outlined text-2xl">account_circle</span>
-        <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Perfil</span>
+        <span class="material-symbols-outlined text-2xl">dashboard</span>
+        <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Portfólio</span>
     </a>
+
 
     <!-- AÇÕES -->
     <a href="{{ url_for('empresas.cadastro_de_acao') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
@@ -60,7 +62,7 @@
 
     <!-- SIMULADOR -->
     <a href="{{ url_for('simulador.investimentos') }}" class="flex flex-col items-center justify-center min-w-[70px] py-2 rounded-xl transition-all duration-300 hover:bg-white/5 active:scale-95 text-white/40 hover:text-[#c00014]">
-        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+        <span class="material-symbols-outlined text-2xl">account_balance</span>
         <span class="text-[9px] font-black uppercase tracking-[0.2em] mt-1">Renda Fixa</span>
     </a>
 

@@ -72,67 +72,58 @@ body {
             </p>
         </div>
 
-
+        <!-- PERFIL -->
         <!-- PERFIL -->
         <div class="flex items-center gap-6 p-4 glass-card rounded-xl">
-            <div class="relative group">
+    <div class="relative group">
 
-                {% if foto_path %}
-
-
-                    <img src="{{ url_for('static', filename=foto_path) }}"
-                         class="w-20 h-20 rounded-lg object-cover border-2"
-                         style="border-color: var(--pink-text)">
-
-                {% elif usuario %}
-                    <img src="{{ url_for('static', filename='perfil/' ~ usuario ~ '.png') }}"
-                         class="w-20 h-20 rounded-lg object-cover border-2"
-                         style="border-color: var(--pink-text)">
-
-                {% else %}
-                    <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/10 group transition">
-
-                        <span class="material-symbols-outlined text-5xl transition-colors duration-300
-                                     text-[var(--pink-baby)] group-hover:text-[var(--precision-red)]">
-                            account_circle
-                        </span>
-
-                    </div>
-                {% endif %}
-                <form method="POST"
-                      enctype="multipart/form-data"
-                      action="{{ url_for('perfil.upload_foto') }}"
-                      class="absolute -bottom-2 -right-2">
-
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                    <label for="foto-input"
-                           class="cursor-pointer bg-precision text-white p-1 rounded-md flex hover:scale-110 transition">
-
-                        <span class="material-symbols-outlined text-sm">photo_camera</span>
-
-                        <input type="file"
-                               id="foto-input"
-                               name="foto"
-                               class="hidden"
-                               onchange="this.form.submit()">
-                    </label>
-                </form>
+        {# 1. Só tenta carregar se foto_path for um caminho real (contendo barra ou extensão) #}
+        {% if foto_path and ('.' in foto_path or '/' in foto_path) %}
+            <div class="w-20 h-20 rounded-lg overflow-hidden border-2 relative" style="border-color: var(--pink-text)">
+                <img src="{{ url_for('static', filename=foto_path) }}"
+                     class="w-full h-full object-cover"
+                     onerror="this.parentElement.style.display='none'; this.parentElement.nextElementSibling.style.display='flex';">
             </div>
 
-            <div>
-                <a href="{{ url_for('historico.historico') }}">
-                    <div class="text-[10px] font-bold tracking-widest uppercase mb-1"
-                         style="color: var(--pink-text)">
-                        Operador Ativo
-                    </div>
-                    <div class="text-xl font-headline font-bold uppercase tracking-tight">
-                        {{ usuario }}
-
-                    </div>
-                </a>
+            {# Fallback escondido que aparece se a imagem acima falhar ou for antiga #}
+            <div style="display:none;" class="w-20 h-20 rounded-lg bg-zinc-900 items-center justify-center border-2 border-dashed border-white/20">
+                <span class="material-symbols-outlined text-5xl text-[var(--pink-baby)]">person</span>
             </div>
-        </div>
+
+        {% else %}
+            {# 2. BLOCO OBRIGATÓRIO PARA CONTAS NOVAS #}
+            <div class="w-20 h-20 rounded-lg bg-zinc-900 flex items-center justify-center border-2 border-dashed border-white/20">
+                <span class="material-symbols-outlined text-5xl text-[var(--pink-baby)] opacity-50">
+                    person
+                </span>
+            </div>
+        {% endif %}
+
+        <!-- Botão de Upload -->
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('perfil.upload_foto') }}" class="absolute -bottom-2 -right-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="foto-input" class="cursor-pointer bg-precision text-white p-1.5 rounded-md flex hover:scale-110 transition shadow-lg shadow-black">
+                <span class="material-symbols-outlined text-sm">photo_camera</span>
+                <input type="file" id="foto-input" name="foto" class="hidden" onchange="this.form.submit()">
+            </label>
+        </form>
+    </div>
+
+    <div>
+        <a href="{{ url_for('historico.historico') }}">
+            <div class="text-[10px] font-bold tracking-widest uppercase mb-1" style="color: var(--pink-text)">
+                Operador Ativo
+            </div>
+            <div class="text-xl font-headline font-bold uppercase tracking-tight">
+                {{ usuario if usuario else 'Novo Operador' }}
+            </div>
+        </a>
+    </div>
+</div>
+
+
+
+
     </div>
 
     <!-- DASHBOARD -->

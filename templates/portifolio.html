@@ -2,8 +2,7 @@
 
 {% block conteudo %}
 
-<!-- botão voltar -->
-    <div class="max-w-6xl mx-auto mt-12 px-4">
+<div class="max-w-6xl mx-auto mt-12 px-4">
 
     <!-- botão voltar -->
     <a href="{{ url_for('perfil.perfil') }}"
@@ -23,9 +22,7 @@
         <span class="text-sm font-semibold text-pink-300">
             Voltar
         </span>
-
     </a>
-<div class="max-w-6xl mx-auto mt-12 px-4">
 
     <!-- Título -->
     <div class="flex items-center justify-between mb-8">
@@ -53,11 +50,14 @@
 
 
 
+
                 <!-- botão -->
-                <a href="{{ url_for('perfil.detalhe_acao', ticker=grupo.ticker, tipo='todas') }}"
+                <!-- No seu portifolio.html, altere apenas a linha do link -->
+                <a href="{{ url_for('perfil.detalhe_acao', ticker=grupo.ticker_base, tipo='todas') }}"
                    class="mt-5 inline-block w-full text-center px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-bold tracking-wide hover:scale-105 transition">
                     Ver Detalhes →
                 </a>
+
 
             </div>
         </div>
