@@ -33,6 +33,7 @@ def criar_tabela():
             patrimonio REAL DEFAULT 0,
             ativos REAL DEFAULT 0,
             divida REAL DEFAULT 0,
+            dividendos_12m REAL DEFAULT 0,
             lote INTEGER DEFAULT 100,
             tipo_acao TEXT NOT NULL
         )

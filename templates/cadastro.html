@@ -86,7 +86,7 @@ body {
               <div class="p-4 mb-6 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center justify-between {% if category == 'error' %} border-primary bg-primary/10 text-primary {% else %} border-green-500 bg-green-500/10 text-green-500 {% endif %}">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-sm">
-                    {% if category == 'error' %}warning{% else %}check_circle{% endif %}
+                    {% if category == 'error' %}warning{% else %}check_circle{% endif %}.
                   </span>
                   {{ message }}
                 </div>

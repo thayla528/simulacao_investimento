@@ -115,6 +115,7 @@ body {
     </div>
 
     <!-- TABELA PRINCIPAL -->
+        <!-- TABELA PRINCIPAL -->
     <div class="overflow-x-auto">
         <table class="table-precision">
             <thead>
@@ -128,6 +129,8 @@ body {
                     <th>Patrimônio</th>
                     <th>Ativos</th>
                     <th>Dívida</th>
+                    <th>DY %</th>
+                    <th>Payout</th>
                     <th>Tipo</th>
                     <th>V. Mercado</th>
                     <th>AÇÕES</th>
@@ -146,6 +149,34 @@ body {
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.patrimonio or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.ativos or 0) }}</td>
                         <td class="text-gray-400">R$ {{ "%.2f"|format(empresa.divida or 0) }}</td>
+
+                        {# --- CÁLCULOS TÉCNICOS CORRIGIDOS (NÃO TIRA NADA DO ORIGINAL) --- #}
+                        {% set preco = empresa.preco_acao or 1 %}
+                        {% set lucro_total = empresa.lucro_liquido or 0 %}
+                        {% set patrimonio = empresa.patrimonio or 1 %}
+                        {% set div_por_acao = empresa.dividendos_12m or 0 %}
+
+                        {# 1. Dividend Yield #}
+                        {% set dy = (div_por_acao / preco * 100) if preco > 0 else 0 %}
+
+                        {# 2. Payout Real (Calculado pela proporção de mercado para não dar zero) #}
+                        {% set n_acoes_total_estimado = (patrimonio / preco) if preco > 0 else 1 %}
+                        {% set lpa_estimado = (lucro_total / n_acoes_total_estimado) if n_acoes_total_estimado > 0 else 0 %}
+                        {% set payout = (div_por_acao / lpa_estimado * 100) if lpa_estimado > 0 else 0 %}
+
+                        <td class="{{ 'text-green-500' if dy >= 6 else 'text-gray-400' }} font-bold">
+                            {{ "%.2f"|format(dy) }}%
+                        </td>
+
+                        <td class="{{ 'text-red-500' if payout > 100 else 'text-gray-400' }}">
+                            {% if payout > 0 %}
+                                {{ "%.2f"|format(payout) }}%
+                            {% else %}
+                                <span class="text-[8px] text-white/20">SEM LUCRO</span>
+                            {% endif %}
+                        </td>
+                        {# --- FIM DOS CÁLCULOS --- #}
+
                         <td class="text-gray-500 text-[9px] font-bold">{{ empresa.tipo_acao }}</td>
                         <td class="text-white font-black">R$ {{ "%.2f"|format((empresa.num_acoes or 0) * (empresa.preco_acao or 0)) }}</td>
                         <td>
@@ -162,12 +193,14 @@ body {
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="12" class="text-center py-20 text-white/10 uppercase tracking-widest text-xs">Nenhum ativo listado no terminal.</td>
+                        <td colspan="14" class="text-center py-20 text-white/10 uppercase tracking-widest text-xs">Nenhum ativo listado no terminal.</td>
                     </tr>
                 {% endif %}
             </tbody>
+
         </table>
     </div>
+
 
     <!-- INDICADORES DE PERFORMANCE -->
     <div class="mt-16">
@@ -222,10 +255,8 @@ body {
             <!-- SÓ O LAYOUT FOI ALTERADO (SAFE) -->
             <div class="grid grid-cols-2 gap-10">
 
-
                 <!-- ESQUERDA -->
                 <div class="space-y-6">
-
                     <div>
                         <label class="text-[9px] font-black text-red-600 uppercase ml-2 mb-1 block tracking-widest">
                             Ticker do Ativo
@@ -262,18 +293,14 @@ body {
                                class="w-full input-precision">
                     </div>
 
-                    <!-- Exemplo de como deve estar o campo no seu formulário -->
                     <div class="flex flex-col">
                         <label class="text-[10px] text-white/40 uppercase mb-2">Tipo de Ação</label>
                         <input type="text" name="tipo_acao" id="tipo_acao" class="input-precision" placeholder="Ex: ON, PN, UNIT">
                     </div>
-
-
                 </div>
 
                 <!-- DIREITA -->
                 <div class="space-y-6">
-
                     <input type="number" step="0.01" name="preco_acao"
                            id="input_preco"
                            placeholder="PREÇO (R$)"
@@ -299,22 +326,23 @@ body {
                            placeholder="DÍVIDA"
                            class="w-full input-precision">
 
-
+                    <!-- NOVO CAMPO DE DIVIDENDOS ADICIONADO ABAIXO -->
+                    <input type="number" step="0.01" name="dividendos_12m"
+                           id="input_dividendos"
+                           placeholder="DIVIDENDOS POR AÇÃO (12M)"
+                           class="w-full input-precision">
 
                     <button type="submit"
                             class="w-full bg-gradient-pink-red text-white font-black py-4 rounded-sm shadow-lg mt-4 uppercase text-[10px] tracking-[0.2em] hover:brightness-110 transition">
                         Registrar_Ativo
                     </button>
-
                 </div>
-
             </div>
-
         </form>
     </div>
 </div>
 
-<<script>
+<script>
 async function buscarDadosB3() {
     const tickerInput = document.getElementById('input_ticker');
     const icon = document.getElementById('icon_lupa');
@@ -322,7 +350,6 @@ async function buscarDadosB3() {
 
     if (!ticker) return;
 
-    // Feedback visual de carregamento
     icon.innerHTML = "sync";
     icon.classList.add("animate-spin-slow");
 
@@ -333,7 +360,6 @@ async function buscarDadosB3() {
         if (data.erro) {
             alert("Ativo não encontrado no Terminal B3.");
         } else {
-            // PREENCHIMENTO AUTOMÁTICO - Ajustado para os seus IDs reais
             document.getElementById('input_empresa').value = data.nome || "";
             document.getElementById('input_setor').value = data.setor || "";
             document.getElementById('input_preco').value = data.preco || "";
@@ -342,7 +368,9 @@ async function buscarDadosB3() {
             document.getElementById('input_ativos').value = data.ativos || 0;
             document.getElementById('input_divida').value = data.divida || 0;
 
-            // AQUI ESTÁ A AUTOMAÇÃO DO TIPO DE AÇÃO
+            // PREENCHIMENTO DO NOVO CAMPO DE DIVIDENDOS
+            document.getElementById('input_dividendos').value = data.dividendos || 0;
+
             if (data.tipo_acao) {
                 document.getElementById('tipo_acao').value = data.tipo_acao;
             }
@@ -355,9 +383,9 @@ async function buscarDadosB3() {
     }
 }
 
-// Faz a busca automática ao sair do campo de Ticker
 document.getElementById('input_ticker').addEventListener('blur', buscarDadosB3);
 </script>
+
 
 
 

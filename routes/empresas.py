@@ -176,6 +176,7 @@ def cadastrar_empresa():
         patrimonio = parse_float(request.form.get("patrimonio"))
         ativos = parse_float(request.form.get("ativos"))
         divida = parse_float(request.form.get("divida"))
+        dividendos_12m = parse_float(request.form.get("dividendos_12m"))  # Novo campo
         lote = int(request.form.get("lote") or 100)
         tipo_acao = (request.form.get("tipo_acao") or "ON").strip().upper()
 
@@ -189,12 +190,12 @@ def cadastrar_empresa():
         cursor.execute("""
             INSERT INTO empresas (
                 usuario_id, ticker, empresa, setor, num_acoes, preco_acao,
-                lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                lucro_liquido, patrimonio, ativos, divida, dividendos_12m,lote, tipo_acao
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
         """, (
             session["usuario_id"],
             ticker, empresa_nome, setor, num_acoes, preco_acao,
-            lucro_liquido, patrimonio, ativos, divida, lote, tipo_acao
+            lucro_liquido, patrimonio, ativos, divida, dividendos_12m, lote, tipo_acao
         ))
 
         conn.commit()
@@ -211,7 +212,6 @@ def cadastrar_empresa():
         flash("Erro ao cadastrar empresa!", "danger")
 
     return redirect(url_for("perfil.perfil"))
-
 
 
 @empresas_bp.route("/buscar_acao/<ticker>")
@@ -238,9 +238,8 @@ def buscar_acao(ticker):
         if not info or ("shortName" not in info and "longName" not in info):
             return jsonify({"erro": "Ativo não encontrado"})
 
-        # Pegando dados do Balanço e DRE (mais confiável que o .info)
+        # Pegando dados do Balanço e DRE
         try:
-            # .iloc[:, 0] pega o dado do período mais recente disponível
             balanco = acao.balance_sheet.iloc[:, 0]
             dre = acao.financials.iloc[:, 0]
 
@@ -249,12 +248,20 @@ def buscar_acao(ticker):
             ativos = float(balanco.get('Total Assets', 0))
             divida = float(balanco.get('Total Debt', 0))
         except Exception:
-            # Fallback caso as tabelas de balanço falhem, tenta pegar do .info
             lucro_liquido = info.get("netIncomeToCommon", 0)
             patrimonio = info.get("totalStockholderEquity", 0) or (
                     info.get("bookValue", 0) * info.get("sharesOutstanding", 1))
             ativos = info.get("totalAssets", 0)
             divida = info.get("totalDebt", 0)
+
+        # --- NOVOS DADOS PARA DY E PAYOUT ---
+        dividendos_por_acao = info.get("dividendRate", 0) or 0
+
+        # Pega o lucro por ação (EPS) para o cálculo do Payout não dar zero
+        lucro_por_acao = info.get("trailingEps", 0) or 0
+
+        # Se não tiver lucro por ação, tentamos calcular o payout direto da API
+        payout_ratio = info.get("payoutRatio", 0) or 0
 
         # Retorno completo para o Frontend
         return jsonify({
@@ -265,10 +272,15 @@ def buscar_acao(ticker):
             "patrimonio": patrimonio,
             "ativos": ativos,
             "divida": divida,
-            "tipo_acao": tipo_automatico  # Campo automatizado enviado ao front
+            "dividendos": dividendos_por_acao,
+            "payout_bruto": payout_ratio * 100,  # Enviamos o Payout já em %
+            "lpa": lucro_por_acao,  # Lucro Por Ação
+            "tipo_acao": tipo_automatico
         })
 
     except Exception as e:
         print(f"ERRO BUSCAR AÇÃO {ticker}: {e}")
         return jsonify({"erro": "Falha ao buscar dados"})
+
+
 
